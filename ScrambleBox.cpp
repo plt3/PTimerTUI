@@ -1,12 +1,64 @@
 #include "ScrambleBox.h"
 
 ScrambleBox::ScrambleBox() {
-    window = newwin(4, 10, 0, 0);
-    box(window, 0, 0);
-    wrefresh(window);
+    int termWidth = getmaxx(stdscr);
+    boxPtr = newwin(3, termWidth, 0, 0);
+    boxWidth = termWidth - 2;
+
+    box(boxPtr, 0, 0);
+    updateScramble();
 }
 
 ScrambleBox::~ScrambleBox() {
-    delwin(window);
-    window = nullptr;
+    delwin(boxPtr);
+    boxPtr = nullptr;
+}
+
+std::string ScrambleBox::makeScramble() {
+    std::string scramble = "", chosenMove;
+    char moveLetter, lastMoveLetter = 'X', lastLastMoveLetter = 'X';
+    unsigned counter = 0;
+    bool first = true;
+
+    // scramble should be 20 moves long
+    while (counter < 20) {
+        // choose random move
+        chosenMove = ALL_MOVES[rand() % NUM_MOVES];
+        // face of the chosen move
+        moveLetter = chosenMove.at(0);
+
+        // avoid sequences like L L2 or U D2 U'
+        if (moveLetter != lastMoveLetter &&
+            !(OPPOSITE_MOVES.at(moveLetter) == lastMoveLetter &&
+              moveLetter == lastLastMoveLetter)) {
+            // don't add space before first move
+            if (first) {
+                first = false;
+            } else {
+                scramble += ' ';
+            }
+            scramble += chosenMove;
+
+            counter++;
+            lastLastMoveLetter = lastMoveLetter;
+            lastMoveLetter = moveLetter;
+        }
+    }
+
+    return scramble;
+}
+
+void ScrambleBox::updateScramble() {
+    std::string scramble = makeScramble();
+
+    // pad scramble with spaces to cover previous scramble
+    unsigned spacesBefore = (boxWidth - scramble.length()) / 2;
+    unsigned spacesAfter = boxWidth - scramble.length() - spacesBefore;
+    std::string paddedScramble = std::string(spacesBefore, ' ') + scramble +
+                                 std::string(spacesAfter, ' ');
+
+    mvwprintw(boxPtr, 1, 1, paddedScramble.c_str());
+
+    // TODO: should refresh here? Or leave that to the calling scope
+    wrefresh(boxPtr);
 }
