@@ -4,5 +4,6 @@
 #include <iostream>
 
 #include "ScrambleBox.h"
+#include "TimerBox.h"
 
 #endif // !TIMER_MAIN_H

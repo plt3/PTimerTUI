@@ -5,24 +5,37 @@ int main(int argc, char *argv[]) {
     srand(time(nullptr));
 
     initscr();
+    // don't print keystrokes to terminal
     noecho();
+    // hide cursor
+    curs_set(0);
     start_color();
     refresh();
 
-    ScrambleBox box1;
+    ScrambleBox sBox;
+    TimerBox tBox;
     refresh();
 
-    move(30, 30);
     char userChar = getch();
+    bool solving = false;
+    double currentSolve;
+    std::string currentScramble;
 
     while (userChar != 'q') {
         if (userChar == ' ') {
-            box1.updateScramble();
+            solving = !solving;
+
+            if (solving) {
+                tBox.startSolveTime();
+            } else {
+                currentSolve = tBox.endSolveTime();
+                currentScramble = sBox.newScramble();
+            }
         }
-        move(30, 30);
         userChar = getch();
     }
 
     endwin();
+
     return 0;
 }

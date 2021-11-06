@@ -28,7 +28,7 @@ private:
 public:
     ScrambleBox();
     ~ScrambleBox();
-    void updateScramble();
+    std::string newScramble();
 };
 
 #endif // !TIMER_SCRAMBLEBOX_H

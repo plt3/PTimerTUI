@@ -6,7 +6,7 @@ ScrambleBox::ScrambleBox() {
     boxWidth = termWidth - 2;
 
     box(boxPtr, 0, 0);
-    updateScramble();
+    newScramble();
 }
 
 ScrambleBox::~ScrambleBox() {
@@ -48,7 +48,7 @@ std::string ScrambleBox::makeScramble() {
     return scramble;
 }
 
-void ScrambleBox::updateScramble() {
+std::string ScrambleBox::newScramble() {
     std::string scramble = makeScramble();
 
     // pad scramble with spaces to cover previous scramble
@@ -61,4 +61,5 @@ void ScrambleBox::updateScramble() {
 
     // TODO: should refresh here? Or leave that to the calling scope
     wrefresh(boxPtr);
+    return scramble;
 }
