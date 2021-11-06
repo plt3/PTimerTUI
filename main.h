@@ -5,5 +5,6 @@
 
 #include "ScrambleBox.h"
 #include "TimerBox.h"
+#include "dbConnection.h"
 
 #endif // !TIMER_MAIN_H

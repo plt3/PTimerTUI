@@ -26,7 +26,7 @@ private:
     std::string makeScramble();
 
 public:
-    ScrambleBox();
+    ScrambleBox(std::string &firstScramble);
     ~ScrambleBox();
     std::string newScramble();
 };

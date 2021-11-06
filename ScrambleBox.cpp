@@ -1,12 +1,12 @@
 #include "ScrambleBox.h"
 
-ScrambleBox::ScrambleBox() {
+ScrambleBox::ScrambleBox(std::string &firstScramble) {
     int termWidth = getmaxx(stdscr);
     boxPtr = newwin(3, termWidth, 0, 0);
     boxWidth = termWidth - 2;
 
     box(boxPtr, 0, 0);
-    newScramble();
+    firstScramble = newScramble();
 }
 
 ScrambleBox::~ScrambleBox() {

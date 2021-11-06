@@ -12,14 +12,15 @@ int main(int argc, char *argv[]) {
     start_color();
     refresh();
 
-    ScrambleBox sBox;
+    dbConnection connection;
+    std::string currentScramble;
+    ScrambleBox sBox(currentScramble);
     TimerBox tBox;
     refresh();
 
     char userChar = getch();
     bool solving = false;
     double currentSolve;
-    std::string currentScramble;
 
     while (userChar != 'q') {
         if (userChar == ' ') {
@@ -29,6 +30,7 @@ int main(int argc, char *argv[]) {
                 tBox.startSolveTime();
             } else {
                 currentSolve = tBox.endSolveTime();
+                connection.addSolve(currentSolve, currentScramble);
                 currentScramble = sBox.newScramble();
             }
         }
