@@ -3,4 +3,5 @@
 *.o
 *.db
 
+Makefile.dep
 PTimerTUI

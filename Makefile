@@ -1,19 +1,30 @@
-PTimerTUI: main.o ScrambleBox.o TimerBox.o dbConnection.o
-	g++ -std=c++11 -l ncurses -l sqlite3 main.o ScrambleBox.o TimerBox.o dbConnection.o -o PTimerTUI
+# make: compiles the program (run make depend first)
+# make run: generates dependencies, builds and runs the program
+# make depend: generates dependencies (run before make)
+# make clean: cleans results of building process (including database)
 
-main.o: main.cpp main.h
-	g++ -std=c++11 -c main.cpp
+SOURCE_FILES = main.cpp ScrambleBox.cpp TimerBox.cpp dbConnection.cpp
+OBJECT_FILES = ${SOURCE_FILES:.cpp=.o}
+EXECUTABLE = PTimerTUI
 
-ScrambleBox.o: ScrambleBox.cpp ScrambleBox.h
-	g++ -std=c++11 -c ScrambleBox.cpp
+$(EXECUTABLE): $(OBJECT_FILES)
+	g++ -std=c++11 -l ncurses -l sqlite3 $(OBJECT_FILES) -o PTimerTUI
 
-TimerBox.o: TimerBox.cpp TimerBox.h
-	g++ -std=c++11 -c TimerBox.cpp
+$(OBJECT_FILES):
+	g++ -std=c++11 -c $*.cpp
 
-dbConnection.o: dbConnection.cpp dbConnection.h
-	g++ -std=c++11 -c dbConnection.cpp
+.PHONY: run depend clean
 
-.PHONY: clean
+run: depend $(EXECUTABLE)
+	./$(EXECUTABLE)
+
+depend:
+	g++ -MM $(SOURCE_FILES) > Makefile.dep
+
+Makefile.dep:
+	touch Makefile.dep
 
 clean:
-	rm *.o *.db PTimerTUI
+	rm -f *.o *.db PTimerTUI
+
+include Makefile.dep
