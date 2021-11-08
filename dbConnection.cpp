@@ -42,3 +42,35 @@ void dbConnection::saveSolve(Solve toAdd) {
         throw std::invalid_argument(errCopy);
     }
 }
+
+unsigned dbConnection::getLastRowid() {
+    // return maximum rowid in solves table or 0 if table has no rows
+    std::string sql = "SELECT MAX(rowid) FROM solves";
+    unsigned lastRowid = 0;
+    char *errorMsg;
+
+    int response =
+        sqlite3_exec(dbPtr, sql.c_str(), rowidCallback, &lastRowid, &errorMsg);
+
+    if (response != SQLITE_OK) {
+        std::string errCopy = errorMsg;
+        sqlite3_free(errorMsg);
+        throw std::invalid_argument(errCopy);
+    }
+
+    return lastRowid;
+}
+
+int dbConnection::rowidCallback(void *intPtr, int argc, char **argv,
+                                char **azColName) {
+    int *returnInt = static_cast<int *>(intPtr);
+
+    // check if argv[0] is null, otherwise assign it to integer
+    if (argv[0]) {
+        *returnInt = static_cast<int>(std::atoi(argv[0]));
+    } else {
+        *returnInt = 0;
+    }
+
+    return 0;
+}

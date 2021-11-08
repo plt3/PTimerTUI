@@ -12,4 +12,4 @@
 
 - Clone repo with `git clone https://github.com/plt3/PTimerTUI`
 - build and run program with `make run`
-  - if using `make` to build program, run `make depend` first to generate dependencies file
+  - if only running `make` to build program, run `make depend` first to generate dependencies file

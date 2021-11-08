@@ -22,8 +22,8 @@ int main(int argc, char *argv[]) {
     char userChar = getch();
     bool solving = false;
     double currentSolveTime;
-    // will have to query db to get actual value for this
-    unsigned currentId = 1;
+    // query db to have currentId be one more than maximum rowid
+    unsigned currentId = connection.getLastRowid() + 1;
 
     while (userChar != 'q') {
         if (userChar == ' ') {
