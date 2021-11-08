@@ -3,7 +3,7 @@
 # make depend: generates dependencies (run before make)
 # make clean: cleans results of building process (including database)
 
-SOURCE_FILES = main.cpp ScrambleBox.cpp TimerBox.cpp dbConnection.cpp
+SOURCE_FILES = main.cpp Solve.cpp ScrambleBox.cpp TimerBox.cpp SolvesBar.cpp dbConnection.cpp
 OBJECT_FILES = ${SOURCE_FILES:.cpp=.o}
 EXECUTABLE = PTimerTUI
 

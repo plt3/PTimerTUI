@@ -16,11 +16,14 @@ int main(int argc, char *argv[]) {
     std::string currentScramble;
     ScrambleBox sBox(currentScramble);
     TimerBox tBox;
+    SolvesBar sBar;
     refresh();
 
     char userChar = getch();
     bool solving = false;
-    double currentSolve;
+    double currentSolveTime;
+    // will have to query db to get actual value for this
+    unsigned currentId = 1;
 
     while (userChar != 'q') {
         if (userChar == ' ') {
@@ -29,9 +32,13 @@ int main(int argc, char *argv[]) {
             if (solving) {
                 tBox.startSolveTime();
             } else {
-                currentSolve = tBox.endSolveTime();
-                connection.addSolve(currentSolve, currentScramble);
+                currentSolveTime = tBox.endSolveTime();
+                Solve currentSolve(currentId, currentSolveTime,
+                                   currentScramble);
+                tBox.updateSolveDisplay(currentSolve);
+                connection.saveSolve(currentSolve);
                 currentScramble = sBox.newScramble();
+                currentId++;
             }
         }
         userChar = getch();

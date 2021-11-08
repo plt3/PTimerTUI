@@ -1,10 +1,9 @@
 #ifndef TIMER_TIMERBOX_H
 #define TIMER_TIMERBOX_H
 
+#include "Solve.h"
 #include <chrono>
-#include <iomanip>
 #include <ncurses.h>
-#include <sstream>
 #include <string>
 
 class TimerBox {
@@ -20,6 +19,7 @@ public:
     ~TimerBox();
     void startSolveTime();
     double endSolveTime();
+    void updateSolveDisplay(Solve newSolve);
 };
 
 #endif // !TIMER_TIMERBOX_H

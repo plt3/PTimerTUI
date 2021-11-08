@@ -29,15 +29,14 @@ double TimerBox::endSolveTime() {
         std::chrono::steady_clock::now();
     std::chrono::duration<double> rawSolveTime = solveEnd - solveStart;
 
-    double fullSolveTime = rawSolveTime.count();
-    std::ostringstream formatTime;
-    formatTime << std::fixed << std::setprecision(2) << fullSolveTime;
-    std::string niceTime = formatTime.str();
+    return rawSolveTime.count();
+}
+
+void TimerBox::updateSolveDisplay(Solve newSolve) {
+    std::string niceTime = newSolve.toString();
 
     wmove(boxPtr, 0, 0);
     wclrtoeol(boxPtr);
     mvwprintw(boxPtr, 0, (boxWidth - niceTime.length()) / 2, niceTime.c_str());
     wrefresh(boxPtr);
-
-    return fullSolveTime;
 }

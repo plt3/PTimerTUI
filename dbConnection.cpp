@@ -28,9 +28,10 @@ void dbConnection::createTable() {
     }
 }
 
-void dbConnection::addSolve(double time, std::string scramble) {
-    std::string sql = "INSERT INTO solves VALUES(" + std::to_string(time) +
-                      ", \"" + scramble + "\");";
+void dbConnection::saveSolve(Solve toAdd) {
+    std::string sql = "INSERT INTO solves VALUES(" +
+                      std::to_string(toAdd.getTime()) + ", \"" +
+                      toAdd.getScramble() + "\");";
 
     char *errorMsg;
     int response = sqlite3_exec(dbPtr, sql.c_str(), nullptr, 0, &errorMsg);

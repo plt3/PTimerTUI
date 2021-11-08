@@ -4,6 +4,8 @@
 #include <iostream>
 
 #include "ScrambleBox.h"
+#include "Solve.h"
+#include "SolvesBar.h"
 #include "TimerBox.h"
 #include "dbConnection.h"
 
