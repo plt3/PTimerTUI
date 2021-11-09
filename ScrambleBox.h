@@ -3,8 +3,6 @@
 
 #include <cstdlib>
 #include <ctime>
-// TODO: remove once I don't need this anymore
-#include <iostream>
 #include <ncurses.h>
 #include <string>
 #include <unordered_map>

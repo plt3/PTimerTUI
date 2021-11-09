@@ -14,9 +14,15 @@ int main(int argc, char *argv[]) {
 
     dbConnection connection;
     std::string currentScramble;
+
     ScrambleBox sBox(currentScramble);
     TimerBox tBox;
-    SolvesBar sBar;
+
+    // fill lastNSolves with last 10 solves by querying db
+    std::deque<Solve> lastNSolves;
+    connection.getLastNSolves(lastNSolves, NUM_SHOWN_SOLVES);
+    SolvesBar sBar(lastNSolves);
+
     refresh();
 
     char userChar = getch();
@@ -37,6 +43,7 @@ int main(int argc, char *argv[]) {
                                    currentScramble);
                 tBox.updateSolveDisplay(currentSolve);
                 connection.saveSolve(currentSolve);
+                sBar.addSolve(currentSolve);
                 currentScramble = sBox.newScramble();
                 currentId++;
             }

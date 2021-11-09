@@ -2,6 +2,7 @@
 #define TIMER_DBCONNECTION_H
 
 #include "Solve.h"
+#include <deque>
 #include <sqlite3.h>
 #include <string>
 
@@ -12,12 +13,15 @@ private:
     void createTable();
     static int rowidCallback(void *intPtr, int argc, char **argv,
                              char **azColName);
+    static int lastNSolvesCallback(void *deqPtr, int argc, char **argv,
+                                   char **azColName);
 
 public:
     dbConnection(std::string filename = "solves.db");
     ~dbConnection();
     void saveSolve(Solve toAdd);
     unsigned getLastRowid();
+    void getLastNSolves(std::deque<Solve> &solvesDeque, unsigned numSolves);
 };
 
 #endif // !TIMER_DBCONNECTION_H

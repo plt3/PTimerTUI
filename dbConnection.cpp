@@ -74,3 +74,34 @@ int dbConnection::rowidCallback(void *intPtr, int argc, char **argv,
 
     return 0;
 }
+
+void dbConnection::getLastNSolves(std::deque<Solve> &solvesDeque,
+                                  unsigned numSolves) {
+    std::string sql =
+        "SELECT rowid, time, scramble FROM solves ORDER BY rowid DESC LIMIT " +
+        std::to_string(numSolves) + ";";
+
+    char *errorMsg;
+
+    int response = sqlite3_exec(dbPtr, sql.c_str(), lastNSolvesCallback,
+                                &solvesDeque, &errorMsg);
+
+    if (response != SQLITE_OK) {
+        std::string errCopy = errorMsg;
+        sqlite3_free(errorMsg);
+        throw std::invalid_argument(errCopy);
+    }
+}
+
+int dbConnection::lastNSolvesCallback(void *deqPtr, int argc, char **argv,
+                                      char **azColName) {
+    std::deque<Solve> *solvesDeq = static_cast<std::deque<Solve> *>(deqPtr);
+    if (argc != 3) {
+        throw std::invalid_argument("Expected 3 returned columns from "
+                                    "dbConnection::lastNSolvesCallback");
+    }
+    Solve newSolve(std::atoi(argv[0]), std::strtod(argv[1], nullptr), argv[2]);
+    solvesDeq->push_front(newSolve);
+
+    return 0;
+}
