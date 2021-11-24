@@ -1,12 +1,12 @@
 #include "ScrambleBox.h"
 
-ScrambleBox::ScrambleBox(std::string &firstScramble) {
+ScrambleBox::ScrambleBox() {
     int termWidth = getmaxx(stdscr);
     boxPtr = newwin(3, termWidth, 0, 0);
     boxWidth = termWidth - 2;
 
     box(boxPtr, 0, 0);
-    firstScramble = newScramble();
+    newScramble();
 }
 
 ScrambleBox::~ScrambleBox() {
@@ -48,18 +48,19 @@ std::string ScrambleBox::makeScramble() {
     return scramble;
 }
 
-std::string ScrambleBox::newScramble() {
-    std::string scramble = makeScramble();
+void ScrambleBox::newScramble() {
+    // set currentScramble attribute
+    currentScramble = makeScramble();
 
     // pad scramble with spaces to cover previous scramble
-    unsigned spacesBefore = (boxWidth - scramble.length()) / 2;
-    unsigned spacesAfter = boxWidth - scramble.length() - spacesBefore;
-    std::string paddedScramble = std::string(spacesBefore, ' ') + scramble +
+    unsigned spacesBefore = (boxWidth - currentScramble.length()) / 2;
+    unsigned spacesAfter = boxWidth - currentScramble.length() - spacesBefore;
+    std::string paddedScramble = std::string(spacesBefore, ' ') +
+                                 currentScramble +
                                  std::string(spacesAfter, ' ');
 
     mvwprintw(boxPtr, 1, 1, paddedScramble.c_str());
 
     // TODO: should refresh here? Or leave that to the calling scope
     wrefresh(boxPtr);
-    return scramble;
 }

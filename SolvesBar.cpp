@@ -1,10 +1,8 @@
 #include "SolvesBar.h"
 
-SolvesBar::SolvesBar(std::deque<Solve> allSolves) {
+SolvesBar::SolvesBar() {
     // TODO: don't hardcode the position/width
     barPtr = newwin(NUM_SHOWN_SOLVES + 2, 8, 3, 0);
-    solves = allSolves;
-    redrawSolves();
 }
 
 SolvesBar::~SolvesBar() {
@@ -12,12 +10,7 @@ SolvesBar::~SolvesBar() {
     barPtr = nullptr;
 }
 
-void SolvesBar::addSolve(Solve toAdd) {
-    solves.push_back(toAdd);
-    redrawSolves();
-}
-
-void SolvesBar::redrawSolves() {
+void SolvesBar::redrawSolves(std::deque<Solve> &solves) {
     wclear(barPtr);
     box(barPtr, 0, 0);
     unsigned counter = 0;

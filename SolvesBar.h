@@ -10,13 +10,11 @@ const int NUM_SHOWN_SOLVES = 12;
 class SolvesBar {
 private:
     WINDOW *barPtr;
-    std::deque<Solve> solves;
 
 public:
-    SolvesBar(std::deque<Solve> allSolves);
+    SolvesBar();
     ~SolvesBar();
-    void addSolve(Solve toAdd);
-    void redrawSolves();
+    void redrawSolves(std::deque<Solve> &solves);
 };
 
 #endif // !TIMER_SOLVESBAR_H

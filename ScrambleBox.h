@@ -21,12 +21,14 @@ class ScrambleBox {
 private:
     WINDOW *boxPtr;
     unsigned boxWidth;
+    std::string currentScramble;
     std::string makeScramble();
 
 public:
-    ScrambleBox(std::string &firstScramble);
+    ScrambleBox();
     ~ScrambleBox();
-    std::string newScramble();
+    std::string getCurrentScramble() { return currentScramble; }
+    void newScramble();
 };
 
 #endif // !TIMER_SCRAMBLEBOX_H

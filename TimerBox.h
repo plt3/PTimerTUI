@@ -10,7 +10,7 @@ class TimerBox {
 private:
     WINDOW *boxPtr;
     unsigned boxWidth = 10;
-    unsigned boxHeight = 1;
+    unsigned boxHeight = 3;
     std::string placeholder = "solving...";
     std::chrono::time_point<std::chrono::steady_clock> solveStart;
 

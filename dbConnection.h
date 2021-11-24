@@ -6,6 +6,8 @@
 #include <sqlite3.h>
 #include <string>
 
+const std::string DEFAULT_FILENAME = "solves.db";
+
 class dbConnection {
 private:
     std::string filename;
@@ -17,7 +19,7 @@ private:
                                    char **azColName);
 
 public:
-    dbConnection(std::string filename = "solves.db");
+    dbConnection(std::string filename = DEFAULT_FILENAME);
     ~dbConnection();
     void saveSolve(Solve toAdd);
     unsigned getLastRowid();

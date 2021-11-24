@@ -7,6 +7,8 @@ TimerBox::TimerBox() {
                     (termWidth - boxWidth) / 2);
 
     mvwprintw(boxPtr, 0, (boxWidth - 4) / 2, "0.00");
+    // TODO: delete this when done
+    // box(boxPtr, 0, 0);
     wrefresh(boxPtr);
 }
 

@@ -1,13 +1,14 @@
 #ifndef TIMER_MAIN_H
 #define TIMER_MAIN_H
 
-#include <deque>
-#include <iostream>
+// #include <deque>
+// #include <iostream>
 
-#include "ScrambleBox.h"
-#include "Solve.h"
-#include "SolvesBar.h"
-#include "TimerBox.h"
-#include "dbConnection.h"
+// #include "ScrambleBox.h"
+// #include "Solve.h"
+// #include "SolvesBar.h"
+// #include "TimerBox.h"
+// #include "dbConnection.h"
+#include "Game.h"
 
 #endif // !TIMER_MAIN_H
