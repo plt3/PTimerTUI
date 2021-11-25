@@ -5,6 +5,8 @@
 #include <sstream>
 #include <string>
 
+const unsigned DEFAULT_PRECISION = 2;
+
 class Solve {
 private:
     unsigned id;
@@ -18,7 +20,11 @@ public:
     unsigned getId() { return id; }
     double getTime() { return time; }
     std::string getScramble() { return scramble; }
-    std::string toString(unsigned precision = 2);
+    static std::string timeToString(double timeToPrint,
+                                    unsigned precision = DEFAULT_PRECISION);
+    std::string toString(unsigned precision = DEFAULT_PRECISION) {
+        return timeToString(time, precision);
+    }
 };
 
 #endif // !TIMER_SOLVE_H

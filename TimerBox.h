@@ -9,8 +9,8 @@
 class TimerBox {
 private:
     WINDOW *boxPtr;
-    unsigned boxWidth = 10;
-    unsigned boxHeight = 3;
+    unsigned boxWidth = 20;
+    unsigned boxHeight = 4;
     std::string placeholder = "solving...";
     std::chrono::time_point<std::chrono::steady_clock> solveStart;
 
@@ -19,7 +19,8 @@ public:
     ~TimerBox();
     void startSolveTime();
     double endSolveTime();
-    void updateSolveDisplay(Solve newSolve);
+    void updateSolveDisplay(Solve newSolve, double shortAvg, double longAvg,
+                            unsigned numShort, unsigned numLong);
 };
 
 #endif // !TIMER_TIMERBOX_H

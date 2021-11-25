@@ -5,10 +5,6 @@ TimerBox::TimerBox() {
     getmaxyx(stdscr, termHeight, termWidth);
     boxPtr = newwin(boxHeight, boxWidth, (termHeight - boxHeight) / 2,
                     (termWidth - boxWidth) / 2);
-
-    mvwprintw(boxPtr, 0, (boxWidth - 4) / 2, "0.00");
-    // TODO: delete this when done
-    // box(boxPtr, 0, 0);
     wrefresh(boxPtr);
 }
 
@@ -34,11 +30,25 @@ double TimerBox::endSolveTime() {
     return rawSolveTime.count();
 }
 
-void TimerBox::updateSolveDisplay(Solve newSolve) {
-    std::string niceTime = newSolve.toString();
+void TimerBox::updateSolveDisplay(Solve newSolve, double shortAvg,
+                                  double longAvg, unsigned numShort,
+                                  unsigned numLong) {
+    std::string niceSolveTime = newSolve.toString();
+    std::string niceShortAvg = Solve::timeToString(shortAvg);
+    std::string niceLongAvg = Solve::timeToString(longAvg);
+
+    std::string shortAvgString =
+        "avg" + std::to_string(numShort) + ": " + niceShortAvg;
+    std::string longAvgString =
+        "avg" + std::to_string(numLong) + ": " + niceLongAvg;
 
     wmove(boxPtr, 0, 0);
     wclrtoeol(boxPtr);
-    mvwprintw(boxPtr, 0, (boxWidth - niceTime.length()) / 2, niceTime.c_str());
+    mvwprintw(boxPtr, 0, (boxWidth - niceSolveTime.length()) / 2,
+              niceSolveTime.c_str());
+    mvwprintw(boxPtr, 2, (boxWidth - shortAvgString.length()) / 2,
+              shortAvgString.c_str());
+    mvwprintw(boxPtr, 3, (boxWidth - longAvgString.length()) / 2,
+              longAvgString.c_str());
     wrefresh(boxPtr);
 }
