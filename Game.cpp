@@ -27,26 +27,26 @@ void Game::mainloop() {
     bool solving = false;
     double currentSolveTime;
 
-    while (userChar != 'q') {
-        if (userChar == ' ') {
-            solving = !solving;
-
-            if (solving) {
-                tBox.startSolveTime();
-            } else {
-                currentSolveTime = tBox.endSolveTime();
-                Solve currentSolve(currentId, currentSolveTime,
-                                   currentScramble);
-                lastNSolves.push_back(currentSolve);
-                setAverages();
-                tBox.updateSolveDisplay(currentSolve, shortAvg, longAvg,
-                                        SHORT_AVG_NUM, LONG_AVG_NUM);
-                connection.saveSolve(currentSolve);
-                sBar.redrawSolves(lastNSolves);
-                sBox.newScramble();
-                currentScramble = sBox.getCurrentScramble();
-                currentId++;
-            }
+    // q quits the program
+    while (userChar != 'q' || solving) {
+        if (!solving && userChar == ' ') {
+            // only spacebar starts the timer
+            solving = true;
+            tBox.startSolveTime();
+        } else if (solving) {
+            // use any key to stop the timer
+            solving = false;
+            currentSolveTime = tBox.endSolveTime();
+            Solve currentSolve(currentId, currentSolveTime, currentScramble);
+            lastNSolves.push_back(currentSolve);
+            setAverages();
+            tBox.updateSolveDisplay(currentSolve, shortAvg, longAvg,
+                                    SHORT_AVG_NUM, LONG_AVG_NUM);
+            connection.saveSolve(currentSolve);
+            sBar.redrawSolves(lastNSolves);
+            sBox.newScramble();
+            currentScramble = sBox.getCurrentScramble();
+            currentId++;
         }
         userChar = getch();
     }
