@@ -3,8 +3,13 @@
 Game::Game(std::string dbFile) : connection(dbFile) {
     currentScramble = sBox.getCurrentScramble();
 
-    // fill lastNSolves with last 12 solves by querying db
-    connection.getLastNSolves(lastNSolves, NUM_SHOWN_SOLVES);
+    // find maximum amount of solves that need to be queried from db and fill
+    // lastNSolves with them
+    if (NUM_SHOWN_SOLVES > LONG_AVG_NUM) {
+        connection.getLastNSolves(lastNSolves, NUM_SHOWN_SOLVES);
+    } else {
+        connection.getLastNSolves(lastNSolves, LONG_AVG_NUM);
+    }
 
     // query db to have currentId be one more than maximum rowid
     currentId = connection.getLastRowid() + 1;

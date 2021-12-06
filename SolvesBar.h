@@ -10,6 +10,8 @@ const int NUM_SHOWN_SOLVES = 12;
 class SolvesBar {
 private:
     WINDOW *barPtr;
+    unsigned height;
+    unsigned width;
 
 public:
     SolvesBar();

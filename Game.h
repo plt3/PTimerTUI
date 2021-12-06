@@ -11,10 +11,8 @@
 #include "TimerBox.h"
 #include "dbConnection.h"
 
-// TODO: these currently both have to be <= NUM_SHOWN_SOLVES since that's the
-// max solves that get loaded from the db at startup. Should probably fix that
 const unsigned SHORT_AVG_NUM = 5;
-const unsigned LONG_AVG_NUM = 12;
+const unsigned LONG_AVG_NUM = 15;
 
 class Game {
 private:
