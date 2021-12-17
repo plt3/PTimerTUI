@@ -20,6 +20,7 @@ private:
     ScrambleBox sBox;
     TimerBox tBox;
     SolvesBar sBar;
+    Solve currentSolve;
     std::string currentScramble;
     std::deque<Solve> lastNSolves;
     unsigned currentId;
@@ -31,6 +32,7 @@ public:
     ~Game() { endwin(); }
     void mainloop();
     void setAverages();
+    void deleteLastSolve();
 };
 
 #endif // !TIMER_GAME_H

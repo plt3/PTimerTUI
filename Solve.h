@@ -18,8 +18,11 @@ public:
           std::string newScramble = "")
         : id(newId), time(newTime), scramble(newScramble) {}
     unsigned getId() { return id; }
+    void setId(unsigned newId) { id = newId; }
     double getTime() { return time; }
+    void setTime(double newTime) { time = newTime; }
     std::string getScramble() { return scramble; }
+    void setScramble(std::string newScramble) { scramble = newScramble; }
     static std::string timeToString(double timeToPrint,
                                     unsigned precision = DEFAULT_PRECISION);
     std::string toString(unsigned precision = DEFAULT_PRECISION) {

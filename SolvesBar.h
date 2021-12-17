@@ -6,6 +6,7 @@
 #include <ncurses.h>
 
 const int NUM_SHOWN_SOLVES = 12;
+const unsigned MIN_WIDTH = 8;
 
 class SolvesBar {
 private:

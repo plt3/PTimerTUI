@@ -43,6 +43,20 @@ void dbConnection::saveSolve(Solve toAdd) {
     }
 }
 
+void dbConnection::deleteSolve(unsigned id) {
+    std::string sql =
+        "DELETE FROM solves WHERE rowid = " + std::to_string(id) + ";";
+    char *errorMsg;
+
+    int response = sqlite3_exec(dbPtr, sql.c_str(), nullptr, 0, &errorMsg);
+
+    if (response != SQLITE_OK) {
+        std::string errCopy = errorMsg;
+        sqlite3_free(errorMsg);
+        throw std::invalid_argument(errCopy);
+    }
+}
+
 unsigned dbConnection::getLastRowid() {
     // return maximum rowid in solves table or 0 if table has no rows
     std::string sql = "SELECT MAX(rowid) FROM solves";
@@ -83,7 +97,7 @@ void dbConnection::getLastNSolves(std::deque<Solve> &solvesDeque,
 
     char *errorMsg;
 
-    int response = sqlite3_exec(dbPtr, sql.c_str(), lastNSolvesCallback,
+    int response = sqlite3_exec(dbPtr, sql.c_str(), pushSolveFrontCallback,
                                 &solvesDeque, &errorMsg);
 
     if (response != SQLITE_OK) {
@@ -93,15 +107,50 @@ void dbConnection::getLastNSolves(std::deque<Solve> &solvesDeque,
     }
 }
 
-int dbConnection::lastNSolvesCallback(void *deqPtr, int argc, char **argv,
-                                      char **azColName) {
+int dbConnection::pushSolveFrontCallback(void *deqPtr, int argc, char **argv,
+                                         char **azColName) {
     std::deque<Solve> *solvesDeq = static_cast<std::deque<Solve> *>(deqPtr);
     if (argc != 3) {
         throw std::invalid_argument("Expected 3 returned columns from "
-                                    "dbConnection::lastNSolvesCallback");
+                                    "dbConnection::pushSolveFrontCallback");
     }
     Solve newSolve(std::atoi(argv[0]), std::strtod(argv[1], nullptr), argv[2]);
     solvesDeq->push_front(newSolve);
 
     return 0;
 }
+
+void dbConnection::addOldSolve(std::deque<Solve> &solvesDeque) {
+    // only try to add solve if solvesDeq is not empty, because empty means that
+    // there is nothing in the db to retrieve
+    if (!solvesDeque.empty()) {
+        unsigned idToGet = solvesDeque.front().getId() - 1;
+        std::string sql =
+            "SELECT rowid, time, scramble FROM solves WHERE rowid = " +
+            std::to_string(idToGet) + ";";
+
+        char *errorMsg;
+
+        int response = sqlite3_exec(dbPtr, sql.c_str(), pushSolveFrontCallback,
+                                    &solvesDeque, &errorMsg);
+
+        if (response != SQLITE_OK) {
+            std::string errCopy = errorMsg;
+            sqlite3_free(errorMsg);
+            throw std::invalid_argument(errCopy);
+        }
+    }
+}
+
+// int dbConnection::addOldSolveCallback(void *deqPtr, int argc, char **argv,
+//                                       char **azColName) {
+//     std::deque<Solve> *solvesDeq = static_cast<std::deque<Solve> *>(deqPtr);
+//     if (argc != 3) {
+//         throw std::invalid_argument("Expected 3 returned columns from "
+//                                     "dbConnection::lastNSolvesCallback");
+//     }
+//     Solve newSolve(std::atoi(argv[0]), std::strtod(argv[1], nullptr),
+//     argv[2]); solvesDeq->push_front(newSolve);
+//
+//     return 0;
+// }

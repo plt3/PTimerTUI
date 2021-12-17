@@ -2,7 +2,7 @@
 
 SolvesBar::SolvesBar() {
     height = NUM_SHOWN_SOLVES + 2;
-    width = 8;
+    width = MIN_WIDTH;
     barPtr = newwin(height, width, 3, 0);
 }
 
@@ -30,7 +30,7 @@ void SolvesBar::redrawSolves(std::deque<Solve> &solves) {
     // change width of window if needed
     // TODO: this leaves the outline of the previous box if it resizes to get
     // smaller. How to fix?
-    if (maxSolveLength + 4 != width) {
+    if (maxSolveLength + 4 != width && maxSolveLength + 4 >= MIN_WIDTH) {
         width = maxSolveLength + 4;
         wresize(barPtr, height, width);
     }

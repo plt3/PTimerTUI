@@ -12,7 +12,7 @@ Game::Game(std::string dbFile) : connection(dbFile) {
     }
 
     // query db to have currentId be one more than maximum rowid
-    currentId = connection.getLastRowid() + 1;
+    currentId = connection.getLastRowid();
 
     sBar.redrawSolves(lastNSolves);
 
@@ -20,8 +20,7 @@ Game::Game(std::string dbFile) : connection(dbFile) {
 
     // make a dummy Solve object and update Solve display to show 0.00 and the
     // current averages
-    Solve dummySolve;
-    tBox.updateSolveDisplay(dummySolve, shortAvg, longAvg, SHORT_AVG_NUM,
+    tBox.updateSolveDisplay(currentSolve, shortAvg, longAvg, SHORT_AVG_NUM,
                             LONG_AVG_NUM);
 
     refresh();
@@ -30,19 +29,27 @@ Game::Game(std::string dbFile) : connection(dbFile) {
 void Game::mainloop() {
     char userChar = getch();
     bool solving = false;
-    double currentSolveTime;
+    double currentSolveTime = 0;
 
     // q quits the program
     while (userChar != 'q' || solving) {
-        if (!solving && userChar == ' ') {
-            // only spacebar starts the timer
-            solving = true;
-            tBox.startSolveTime();
-        } else if (solving) {
+        if (!solving) {
+            if (userChar == ' ') {
+                // only spacebar starts the timer
+                solving = true;
+                tBox.startSolveTime();
+                // TODO: make this ctrl + something
+            } else if (userChar == 'j') {
+                deleteLastSolve();
+            }
+        } else {
             // use any key to stop the timer
             solving = false;
+            currentId++;
             currentSolveTime = tBox.endSolveTime();
-            Solve currentSolve(currentId, currentSolveTime, currentScramble);
+            currentSolve.setId(currentId);
+            currentSolve.setTime(currentSolveTime);
+            currentSolve.setScramble(currentScramble);
             lastNSolves.push_back(currentSolve);
             setAverages();
             tBox.updateSolveDisplay(currentSolve, shortAvg, longAvg,
@@ -51,9 +58,33 @@ void Game::mainloop() {
             sBar.redrawSolves(lastNSolves);
             sBox.newScramble();
             currentScramble = sBox.getCurrentScramble();
-            currentId++;
         }
         userChar = getch();
+    }
+}
+
+void Game::deleteLastSolve() {
+    // only try to delete solve if db is not empty
+    if (currentId != 0) {
+        // delete solve from db
+        connection.deleteSolve(currentId);
+        currentId--;
+        // remove last solve from lastNSolves deque
+        lastNSolves.pop_back();
+        // query db to add extra solve to front of deque to
+        // calculate averages again
+        connection.addOldSolve(lastNSolves);
+        sBar.redrawSolves(lastNSolves);
+        // set currentSolve so that the display shows the last
+        // solve's time
+        if (!lastNSolves.empty()) {
+            currentSolve = lastNSolves.back();
+        } else {
+            currentSolve.setTime(0);
+        }
+        setAverages();
+        tBox.updateSolveDisplay(currentSolve, shortAvg, longAvg, SHORT_AVG_NUM,
+                                LONG_AVG_NUM);
     }
 }
 

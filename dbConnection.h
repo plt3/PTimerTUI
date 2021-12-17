@@ -15,15 +15,19 @@ private:
     void createTable();
     static int rowidCallback(void *intPtr, int argc, char **argv,
                              char **azColName);
-    static int lastNSolvesCallback(void *deqPtr, int argc, char **argv,
+    static int pushSolveFrontCallback(void *deqPtr, int argc, char **argv,
+                                      char **azColName);
+    static int addOldSolveCallback(void *deqPtr, int argc, char **argv,
                                    char **azColName);
 
 public:
     dbConnection(std::string filename = DEFAULT_FILENAME);
     ~dbConnection();
     void saveSolve(Solve toAdd);
+    void deleteSolve(unsigned id);
     unsigned getLastRowid();
     void getLastNSolves(std::deque<Solve> &solvesDeque, unsigned numSolves);
+    void addOldSolve(std::deque<Solve> &solvesDeque);
 };
 
 #endif // !TIMER_DBCONNECTION_H
