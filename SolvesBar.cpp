@@ -11,7 +11,9 @@ SolvesBar::~SolvesBar() {
     barPtr = nullptr;
 }
 
-void SolvesBar::redrawSolves(std::deque<Solve> &solves) {
+void SolvesBar::redrawSolves(std::deque<Solve> &solves,
+                             unsigned highlightIndex) {
+    Solve toDraw;
     unsigned counter = 0, maxSolveLength = 0;
     std::string solveString;
     unsigned startPos = 0;
@@ -41,8 +43,15 @@ void SolvesBar::redrawSolves(std::deque<Solve> &solves) {
 
     for (unsigned i = solves.size(); i > 0 && counter < NUM_SHOWN_SOLVES; i--) {
         // have to traverse deque backwards to get newest solve at top of box
-        solveString = solves.at(i - 1).toString();
+        toDraw = solves.at(i - 1);
+        solveString = toDraw.toString();
+        if (i - 1 == highlightIndex) {
+            wattron(barPtr, A_REVERSE);
+        }
         mvwprintw(barPtr, counter + 1, 2, solveString.c_str());
+        if (i - 1 == highlightIndex) {
+            wattroff(barPtr, A_REVERSE);
+        }
         counter++;
     }
 

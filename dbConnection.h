@@ -27,7 +27,7 @@ public:
     void deleteSolve(unsigned id);
     unsigned getLastRowid();
     void getLastNSolves(std::deque<Solve> &solvesDeque, unsigned numSolves);
-    void addOldSolve(std::deque<Solve> &solvesDeque);
+    bool addOldSolve(std::deque<Solve> &solvesDeque);
 };
 
 #endif // !TIMER_DBCONNECTION_H

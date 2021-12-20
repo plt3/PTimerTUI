@@ -17,7 +17,7 @@ private:
 public:
     SolvesBar();
     ~SolvesBar();
-    void redrawSolves(std::deque<Solve> &solves);
+    void redrawSolves(std::deque<Solve> &solves, unsigned highlightIndex);
 };
 
 #endif // !TIMER_SOLVESBAR_H

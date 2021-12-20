@@ -120,37 +120,32 @@ int dbConnection::pushSolveFrontCallback(void *deqPtr, int argc, char **argv,
     return 0;
 }
 
-void dbConnection::addOldSolve(std::deque<Solve> &solvesDeque) {
+bool dbConnection::addOldSolve(std::deque<Solve> &solvesDeque) {
     // only try to add solve if solvesDeq is not empty, because empty means that
     // there is nothing in the db to retrieve
     if (!solvesDeque.empty()) {
-        unsigned idToGet = solvesDeque.front().getId() - 1;
+        // TODO: check case if you only have one solve with id 2 in the database
+
+        // this query gets the solve with greatest rowid that is less than the
+        // id of the solve at the front of solvesDeque
+        unsigned idToGet = solvesDeque.front().getId();
+        unsigned lengthBefore = solvesDeque.size();
         std::string sql =
-            "SELECT rowid, time, scramble FROM solves WHERE rowid = " +
-            std::to_string(idToGet) + ";";
+            "SELECT rowid, time, scramble FROM solves WHERE rowid < " +
+            std::to_string(idToGet) + " ORDER BY rowid DESC LIMIT 1;";
 
         char *errorMsg;
 
         int response = sqlite3_exec(dbPtr, sql.c_str(), pushSolveFrontCallback,
                                     &solvesDeque, &errorMsg);
 
+        unsigned lengthAfter = solvesDeque.size();
         if (response != SQLITE_OK) {
             std::string errCopy = errorMsg;
             sqlite3_free(errorMsg);
             throw std::invalid_argument(errCopy);
         }
+        return lengthAfter != lengthBefore;
     }
+    return false;
 }
-
-// int dbConnection::addOldSolveCallback(void *deqPtr, int argc, char **argv,
-//                                       char **azColName) {
-//     std::deque<Solve> *solvesDeq = static_cast<std::deque<Solve> *>(deqPtr);
-//     if (argc != 3) {
-//         throw std::invalid_argument("Expected 3 returned columns from "
-//                                     "dbConnection::lastNSolvesCallback");
-//     }
-//     Solve newSolve(std::atoi(argv[0]), std::strtod(argv[1], nullptr),
-//     argv[2]); solvesDeq->push_front(newSolve);
-//
-//     return 0;
-// }

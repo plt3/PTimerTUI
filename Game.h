@@ -24,6 +24,7 @@ private:
     std::string currentScramble;
     std::deque<Solve> lastNSolves;
     unsigned currentId;
+    int highlightedIndex;
     double shortAvg;
     double longAvg;
 
@@ -32,7 +33,7 @@ public:
     ~Game() { endwin(); }
     void mainloop();
     void setAverages();
-    void deleteLastSolve();
+    void deleteSolveAtIndex(int index);
 };
 
 #endif // !TIMER_GAME_H

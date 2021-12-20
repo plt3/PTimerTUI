@@ -13,8 +13,10 @@ Game::Game(std::string dbFile) : connection(dbFile) {
 
     // query db to have currentId be one more than maximum rowid
     currentId = connection.getLastRowid();
+    // highlight most recent solve
+    highlightedIndex = lastNSolves.size() - 1;
 
-    sBar.redrawSolves(lastNSolves);
+    sBar.redrawSolves(lastNSolves, highlightedIndex);
 
     setAverages();
 
@@ -39,13 +41,26 @@ void Game::mainloop() {
                 solving = true;
                 tBox.startSolveTime();
                 // TODO: make this ctrl + something
+            } else if (userChar == 'd') {
+                deleteSolveAtIndex(highlightedIndex);
+                // highlight next solve down
             } else if (userChar == 'j') {
-                deleteLastSolve();
+                if (highlightedIndex > 0) {
+                    highlightedIndex--;
+                    sBar.redrawSolves(lastNSolves, highlightedIndex);
+                }
+                // highlight previous solve up
+            } else if (userChar == 'k') {
+                if (highlightedIndex + 1 < lastNSolves.size()) {
+                    highlightedIndex++;
+                    sBar.redrawSolves(lastNSolves, highlightedIndex);
+                }
             }
         } else {
             // use any key to stop the timer
             solving = false;
             currentId++;
+            highlightedIndex++;
             currentSolveTime = tBox.endSolveTime();
             currentSolve.setId(currentId);
             currentSolve.setTime(currentSolveTime);
@@ -55,7 +70,7 @@ void Game::mainloop() {
             tBox.updateSolveDisplay(currentSolve, shortAvg, longAvg,
                                     SHORT_AVG_NUM, LONG_AVG_NUM);
             connection.saveSolve(currentSolve);
-            sBar.redrawSolves(lastNSolves);
+            sBar.redrawSolves(lastNSolves, highlightedIndex);
             sBox.newScramble();
             currentScramble = sBox.getCurrentScramble();
         }
@@ -63,24 +78,35 @@ void Game::mainloop() {
     }
 }
 
-void Game::deleteLastSolve() {
+void Game::deleteSolveAtIndex(int index) {
     // only try to delete solve if db is not empty
-    if (currentId != 0) {
+    if (!lastNSolves.empty()) {
         // delete solve from db
-        connection.deleteSolve(currentId);
-        currentId--;
-        // remove last solve from lastNSolves deque
-        lastNSolves.pop_back();
+        connection.deleteSolve(lastNSolves.at(index).getId());
+        // decrement currentId and highlightedIndex if deleting the last solve
+        if (index + 1 == lastNSolves.size()) {
+            currentId--;
+        }
+        // remove solve from lastNSolves deque
+        lastNSolves.erase(lastNSolves.begin() + index);
         // query db to add extra solve to front of deque to
         // calculate averages again
-        connection.addOldSolve(lastNSolves);
-        sBar.redrawSolves(lastNSolves);
+        bool solveAdded = connection.addOldSolve(lastNSolves);
+        if (highlightedIndex > 0 && !solveAdded) {
+            highlightedIndex--;
+        }
+        sBar.redrawSolves(lastNSolves, highlightedIndex);
         // set currentSolve so that the display shows the last
         // solve's time
         if (!lastNSolves.empty()) {
             currentSolve = lastNSolves.back();
         } else {
             currentSolve.setTime(0);
+            currentId = 0;
+            // add this when deleting only solve in lastNSolves so that it
+            // becomes zero again when it gets incremented at the end of the
+            // next solve entered
+            highlightedIndex = -1;
         }
         setAverages();
         tBox.updateSolveDisplay(currentSolve, shortAvg, longAvg, SHORT_AVG_NUM,
