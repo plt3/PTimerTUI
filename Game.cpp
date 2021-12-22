@@ -31,7 +31,6 @@ Game::Game(std::string dbFile) : connection(dbFile) {
 void Game::mainloop() {
     char userChar = getch();
     bool solving = false;
-    double currentSolveTime = 0;
 
     // q quits the program
     while (userChar != 'q' || solving) {
@@ -40,17 +39,17 @@ void Game::mainloop() {
                 // only spacebar starts the timer
                 solving = true;
                 tBox.startSolveTime();
-                // TODO: make this ctrl + something
-            } else if (userChar == 'd') {
+            } else if (userChar == ctrl('d')) {
+                // delete solve with ctrl + d
                 deleteSolveAtIndex(highlightedIndex);
-                // highlight next solve down
             } else if (userChar == 'j') {
+                // highlight next solve down
                 if (highlightedIndex > 0) {
                     highlightedIndex--;
                     sBar.redrawSolves(lastNSolves, highlightedIndex);
                 }
-                // highlight previous solve up
             } else if (userChar == 'k') {
+                // highlight previous solve up
                 if (highlightedIndex + 1 < lastNSolves.size()) {
                     highlightedIndex++;
                     sBar.redrawSolves(lastNSolves, highlightedIndex);
@@ -61,9 +60,8 @@ void Game::mainloop() {
             solving = false;
             currentId++;
             highlightedIndex++;
-            currentSolveTime = tBox.endSolveTime();
             currentSolve.setId(currentId);
-            currentSolve.setTime(currentSolveTime);
+            currentSolve.setTime(tBox.endSolveTime());
             currentSolve.setScramble(currentScramble);
             lastNSolves.push_back(currentSolve);
             setAverages();

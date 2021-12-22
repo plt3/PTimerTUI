@@ -11,6 +11,9 @@
 #include "TimerBox.h"
 #include "dbConnection.h"
 
+// can check for ctrl + key with userChar == ctrl(key) now
+#define ctrl(x) (x & 0x1F)
+
 const unsigned SHORT_AVG_NUM = 5;
 const unsigned LONG_AVG_NUM = 15;
 
