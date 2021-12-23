@@ -7,6 +7,8 @@ int main(int argc, char *argv[]) {
     initscr();
     // don't print keystrokes to terminal
     noecho();
+    // detect arrow keys, etc.
+    keypad(stdscr, TRUE);
     // hide cursor
     curs_set(0);
     start_color();

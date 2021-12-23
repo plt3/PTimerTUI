@@ -16,7 +16,13 @@ Game::Game(std::string dbFile) : connection(dbFile) {
     // highlight most recent solve
     highlightedIndex = lastNSolves.size() - 1;
 
-    sBar.redrawSolves(lastNSolves, highlightedIndex);
+    lowestDisplayedIndex = bottomOfFrameIndex =
+        lastNSolves.size() - NUM_SHOWN_SOLVES;
+    if (bottomOfFrameIndex < 0) {
+        lowestDisplayedIndex = bottomOfFrameIndex = 0;
+    }
+
+    sBar.redrawSolves(lastNSolves, highlightedIndex, 0);
 
     setAverages();
 
@@ -29,7 +35,7 @@ Game::Game(std::string dbFile) : connection(dbFile) {
 }
 
 void Game::mainloop() {
-    char userChar = getch();
+    int userChar = getch();
     bool solving = false;
 
     // q quits the program
@@ -42,37 +48,84 @@ void Game::mainloop() {
             } else if (userChar == ctrl('d')) {
                 // delete solve with ctrl + d
                 deleteSolveAtIndex(highlightedIndex);
-            } else if (userChar == 'j') {
+            } else if (userChar == 'j' || userChar == KEY_DOWN) {
                 // highlight next solve down
-                if (highlightedIndex > 0) {
-                    highlightedIndex--;
-                    sBar.redrawSolves(lastNSolves, highlightedIndex);
-                }
-            } else if (userChar == 'k') {
+                scrollDown();
+            } else if (userChar == 'k' || userChar == KEY_UP) {
                 // highlight previous solve up
-                if (highlightedIndex + 1 < lastNSolves.size()) {
-                    highlightedIndex++;
-                    sBar.redrawSolves(lastNSolves, highlightedIndex);
-                }
+                scrollUp();
             }
         } else {
             // use any key to stop the timer
             solving = false;
-            currentId++;
-            highlightedIndex++;
-            currentSolve.setId(currentId);
-            currentSolve.setTime(tBox.endSolveTime());
-            currentSolve.setScramble(currentScramble);
-            lastNSolves.push_back(currentSolve);
-            setAverages();
-            tBox.updateSolveDisplay(currentSolve, shortAvg, longAvg,
-                                    SHORT_AVG_NUM, LONG_AVG_NUM);
-            connection.saveSolve(currentSolve);
-            sBar.redrawSolves(lastNSolves, highlightedIndex);
-            sBox.newScramble();
-            currentScramble = sBox.getCurrentScramble();
+            endSolve();
         }
         userChar = getch();
+    }
+}
+
+void Game::endSolve() {
+    currentId++;
+    highlightedIndex++;
+
+    if (lastNSolves.size() == NUM_SHOWN_SOLVES) {
+        bottomOfFrameIndex = lowestDisplayedIndex = 1;
+    } else if (lastNSolves.size() > NUM_SHOWN_SOLVES) {
+        bottomOfFrameIndex++;
+        lowestDisplayedIndex++;
+    }
+
+    currentSolve.setId(currentId);
+    currentSolve.setTime(tBox.endSolveTime());
+    currentSolve.setScramble(currentScramble);
+    lastNSolves.push_back(currentSolve);
+    setAverages();
+    tBox.updateSolveDisplay(currentSolve, shortAvg, longAvg, SHORT_AVG_NUM,
+                            LONG_AVG_NUM);
+    connection.saveSolve(currentSolve);
+    sBar.redrawSolves(lastNSolves, highlightedIndex,
+                      bottomOfFrameIndex - lowestDisplayedIndex);
+    sBox.newScramble();
+    currentScramble = sBox.getCurrentScramble();
+}
+
+void Game::scrollDown() {
+    if (highlightedIndex > 0) {
+        highlightedIndex--;
+    } else {
+        // if trying to scroll down past front of deque, try to get
+        // an older solve from the db
+        if (connection.addOldSolve(lastNSolves)) {
+            bottomOfFrameIndex++;
+            lowestDisplayedIndex++;
+        }
+    }
+
+    // change lowestDisplayedIndex if scrolling out of frame to
+    // calculate offset
+    if (highlightedIndex < lowestDisplayedIndex) {
+        lowestDisplayedIndex--;
+        if (lowestDisplayedIndex < 0) {
+            lowestDisplayedIndex = 0;
+        }
+    }
+
+    sBar.redrawSolves(lastNSolves, highlightedIndex,
+                      bottomOfFrameIndex - lowestDisplayedIndex);
+}
+
+void Game::scrollUp() {
+    if (highlightedIndex + 1 < lastNSolves.size()) {
+        highlightedIndex++;
+
+        // increment lowestDisplayedIndex if scrolling out of frame
+        // to calculate offset
+        if (highlightedIndex >= lowestDisplayedIndex + NUM_SHOWN_SOLVES) {
+            lowestDisplayedIndex++;
+        }
+
+        sBar.redrawSolves(lastNSolves, highlightedIndex,
+                          bottomOfFrameIndex - lowestDisplayedIndex);
     }
 }
 
@@ -90,10 +143,17 @@ void Game::deleteSolveAtIndex(int index) {
         // query db to add extra solve to front of deque to
         // calculate averages again
         bool solveAdded = connection.addOldSolve(lastNSolves);
+        if (bottomOfFrameIndex > 0 && !solveAdded) {
+            bottomOfFrameIndex--;
+        }
+        if (lowestDisplayedIndex > 0 && !solveAdded) {
+            lowestDisplayedIndex--;
+        }
         if (highlightedIndex > 0 && !solveAdded) {
             highlightedIndex--;
         }
-        sBar.redrawSolves(lastNSolves, highlightedIndex);
+        sBar.redrawSolves(lastNSolves, highlightedIndex,
+                          bottomOfFrameIndex - lowestDisplayedIndex);
         // set currentSolve so that the display shows the last
         // solve's time
         if (!lastNSolves.empty()) {
@@ -104,7 +164,7 @@ void Game::deleteSolveAtIndex(int index) {
             // add this when deleting only solve in lastNSolves so that it
             // becomes zero again when it gets incremented at the end of the
             // next solve entered
-            highlightedIndex = -1;
+            bottomOfFrameIndex = lowestDisplayedIndex = highlightedIndex = -1;
         }
         setAverages();
         tBox.updateSolveDisplay(currentSolve, shortAvg, longAvg, SHORT_AVG_NUM,

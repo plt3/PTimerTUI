@@ -11,18 +11,23 @@ SolvesBar::~SolvesBar() {
     barPtr = nullptr;
 }
 
-void SolvesBar::redrawSolves(std::deque<Solve> &solves,
-                             unsigned highlightIndex) {
+void SolvesBar::redrawSolves(std::deque<Solve> &solves, unsigned highlightIndex,
+                             int offset) {
     Solve toDraw;
     unsigned counter = 0, maxSolveLength = 0;
     std::string solveString;
     unsigned startPos = 0;
 
     if (solves.size() > NUM_SHOWN_SOLVES) {
-        startPos = solves.size() - NUM_SHOWN_SOLVES;
+        startPos = solves.size() - NUM_SHOWN_SOLVES - offset;
+    } else {
+        // having an offset doesn't make sense if all solves can fit in the
+        // display
+        offset = 0;
     }
 
-    for (unsigned i = startPos; i < solves.size(); i++) {
+    // get maximum solve display length for width
+    for (unsigned i = startPos; i < solves.size() - offset; i++) {
         solveString = solves.at(i).toString();
         if (solveString.length() > maxSolveLength) {
             maxSolveLength = solveString.length();
@@ -41,7 +46,8 @@ void SolvesBar::redrawSolves(std::deque<Solve> &solves,
     box(barPtr, 0, 0);
     wrefresh(barPtr);
 
-    for (unsigned i = solves.size(); i > 0 && counter < NUM_SHOWN_SOLVES; i--) {
+    for (unsigned i = solves.size() - offset;
+         i > 0 && counter < NUM_SHOWN_SOLVES; i--) {
         // have to traverse deque backwards to get newest solve at top of box
         toDraw = solves.at(i - 1);
         solveString = toDraw.toString();

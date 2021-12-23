@@ -28,6 +28,8 @@ private:
     std::deque<Solve> lastNSolves;
     unsigned currentId;
     int highlightedIndex;
+    int bottomOfFrameIndex;
+    int lowestDisplayedIndex;
     double shortAvg;
     double longAvg;
 
@@ -37,6 +39,9 @@ public:
     void mainloop();
     void setAverages();
     void deleteSolveAtIndex(int index);
+    void endSolve();
+    void scrollDown();
+    void scrollUp();
 };
 
 #endif // !TIMER_GAME_H
