@@ -39,11 +39,16 @@ void TimerBox::updateSolveDisplay(Solve newSolve, double shortAvg,
 
     if (shortAvg == 0) {
         niceShortAvg = "-";
+    } else if (shortAvg == DNF_TIME_VALUE) {
+        niceShortAvg = "DNF";
     } else {
         niceShortAvg = Solve::timeToString(shortAvg);
     }
+
     if (longAvg == 0) {
         niceLongAvg = "-";
+    } else if (longAvg == DNF_TIME_VALUE) {
+        niceLongAvg = "DNF";
     } else {
         niceLongAvg = Solve::timeToString(longAvg);
     }

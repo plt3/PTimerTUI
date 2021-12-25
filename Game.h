@@ -39,6 +39,7 @@ public:
     void mainloop();
     void setAverages();
     void deleteSolveAtIndex(int index);
+    void updatePenaltyAtIndex(int index, unsigned penalty);
     void endSolve();
     void scrollDown();
     void scrollUp();

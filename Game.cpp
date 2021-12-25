@@ -45,15 +45,23 @@ void Game::mainloop() {
                 // only spacebar starts the timer
                 solving = true;
                 tBox.startSolveTime();
-            } else if (userChar == ctrl('d')) {
-                // delete solve with ctrl + d
-                deleteSolveAtIndex(highlightedIndex);
             } else if (userChar == 'j' || userChar == KEY_DOWN) {
                 // highlight next solve down
                 scrollDown();
             } else if (userChar == 'k' || userChar == KEY_UP) {
                 // highlight previous solve up
                 scrollUp();
+            } else if (userChar == ctrl('d')) {
+                // delete solve with ctrl + d
+                deleteSolveAtIndex(highlightedIndex);
+            } else if (userChar == ctrl('g')) {
+                // add penalties with ctrl + g/p/n
+                // (mnemonic is g = good, p = plus 2, n = dNf)
+                updatePenaltyAtIndex(highlightedIndex, 0);
+            } else if (userChar == ctrl('p')) {
+                updatePenaltyAtIndex(highlightedIndex, 1);
+            } else if (userChar == ctrl('n')) {
+                updatePenaltyAtIndex(highlightedIndex, 2);
             }
         } else {
             // use any key to stop the timer
@@ -172,6 +180,20 @@ void Game::deleteSolveAtIndex(int index) {
     }
 }
 
+void Game::updatePenaltyAtIndex(int index, unsigned penalty) {
+    // only try to update penalty if db is not empty
+    if (!lastNSolves.empty()) {
+        Solve &toChange = lastNSolves.at(index);
+        connection.updateSolvePenalty(toChange.getId(), penalty);
+        toChange.setPenalty(penalty);
+        setAverages();
+        sBar.redrawSolves(lastNSolves, highlightedIndex,
+                          bottomOfFrameIndex - lowestDisplayedIndex);
+        tBox.updateSolveDisplay(currentSolve, shortAvg, longAvg, SHORT_AVG_NUM,
+                                LONG_AVG_NUM);
+    }
+}
+
 void Game::setAverages() {
     // set shortAvg and longAvg data members to the averages they represent, or
     // to zero if there are not enough times to calculate them
@@ -187,10 +209,25 @@ void Game::setAverages() {
         }
         unsigned lastDeqInd = lastNSolves.size() - 1;
         std::vector<double> shortAvgVector, longAvgVector;
+        Solve curSolve;
         double curTime;
+        unsigned shortDnfCount = 0, longDnfCount = 0;
 
         for (unsigned i = 0; i < iStop; i++) {
-            curTime = lastNSolves.at(lastDeqInd - i).getTime();
+            curSolve = lastNSolves.at(lastDeqInd - i);
+            curTime = curSolve.getTime();
+            if (curSolve.getPenalty() == 1) {
+                // handle +2
+                curTime += 2;
+            } else if (curSolve.getPenalty() == 2) {
+                // count how many DNFs in each average (>=2 DNFs makes the
+                // entire average DNF)
+                if (i < SHORT_AVG_NUM) {
+                    shortDnfCount++;
+                }
+                longDnfCount++;
+            }
+
             if (i < SHORT_AVG_NUM) {
                 shortAvgVector.push_back(curTime);
             }
@@ -226,10 +263,19 @@ void Game::setAverages() {
         longSum -= longRemove;
 
         shortAvg = shortSum / (SHORT_AVG_NUM - 2);
+
+        // make average DNF if need be
+        if (shortDnfCount >= 2) {
+            shortAvg = DNF_TIME_VALUE;
+        }
+
         if (skipLong) {
             longAvg = 0;
         } else {
             longAvg = longSum / (LONG_AVG_NUM - 2);
+            if (longDnfCount >= 2) {
+                longAvg = DNF_TIME_VALUE;
+            }
         }
     }
 }

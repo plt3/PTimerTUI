@@ -25,6 +25,7 @@ public:
     ~dbConnection();
     void saveSolve(Solve toAdd);
     void deleteSolve(unsigned id);
+    void updateSolvePenalty(unsigned id, unsigned newPenalty);
     unsigned getLastRowid();
     void getLastNSolves(std::deque<Solve> &solvesDeque, unsigned numSolves);
     bool addOldSolve(std::deque<Solve> &solvesDeque);

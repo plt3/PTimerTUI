@@ -15,8 +15,9 @@ dbConnection::~dbConnection() {
 void dbConnection::createTable() {
     // TODO: add date field to this? penalty?
     std::string sql = "CREATE TABLE IF NOT EXISTS solves("
-                      "time REAL NOT NULL,"
-                      "scramble TEXT NOT NULL);";
+                      "time REAL NOT NULL, "
+                      "scramble TEXT NOT NULL, "
+                      "penalty INTEGER NOT NULL);";
 
     char *errorMsg;
     int response = sqlite3_exec(dbPtr, sql.c_str(), nullptr, 0, &errorMsg);
@@ -31,7 +32,8 @@ void dbConnection::createTable() {
 void dbConnection::saveSolve(Solve toAdd) {
     std::string sql = "INSERT INTO solves VALUES(" +
                       std::to_string(toAdd.getTime()) + ", \"" +
-                      toAdd.getScramble() + "\");";
+                      toAdd.getScramble() + "\", " +
+                      std::to_string(toAdd.getPenalty()) + ");";
 
     char *errorMsg;
     int response = sqlite3_exec(dbPtr, sql.c_str(), nullptr, 0, &errorMsg);
@@ -46,6 +48,21 @@ void dbConnection::saveSolve(Solve toAdd) {
 void dbConnection::deleteSolve(unsigned id) {
     std::string sql =
         "DELETE FROM solves WHERE rowid = " + std::to_string(id) + ";";
+    char *errorMsg;
+
+    int response = sqlite3_exec(dbPtr, sql.c_str(), nullptr, 0, &errorMsg);
+
+    if (response != SQLITE_OK) {
+        std::string errCopy = errorMsg;
+        sqlite3_free(errorMsg);
+        throw std::invalid_argument(errCopy);
+    }
+}
+
+void dbConnection::updateSolvePenalty(unsigned id, unsigned newPenalty) {
+    std::string sql =
+        "UPDATE solves SET penalty = " + std::to_string(newPenalty) +
+        " WHERE rowid = " + std::to_string(id) + ";";
     char *errorMsg;
 
     int response = sqlite3_exec(dbPtr, sql.c_str(), nullptr, 0, &errorMsg);
@@ -91,9 +108,9 @@ int dbConnection::rowidCallback(void *intPtr, int argc, char **argv,
 
 void dbConnection::getLastNSolves(std::deque<Solve> &solvesDeque,
                                   unsigned numSolves) {
-    std::string sql =
-        "SELECT rowid, time, scramble FROM solves ORDER BY rowid DESC LIMIT " +
-        std::to_string(numSolves) + ";";
+    std::string sql = "SELECT rowid, time, scramble, penalty FROM solves ORDER "
+                      "BY rowid DESC LIMIT " +
+                      std::to_string(numSolves) + ";";
 
     char *errorMsg;
 
@@ -110,11 +127,12 @@ void dbConnection::getLastNSolves(std::deque<Solve> &solvesDeque,
 int dbConnection::pushSolveFrontCallback(void *deqPtr, int argc, char **argv,
                                          char **azColName) {
     std::deque<Solve> *solvesDeq = static_cast<std::deque<Solve> *>(deqPtr);
-    if (argc != 3) {
-        throw std::invalid_argument("Expected 3 returned columns from "
+    if (argc != 4) {
+        throw std::invalid_argument("Expected 4 returned columns from "
                                     "dbConnection::pushSolveFrontCallback");
     }
-    Solve newSolve(std::atoi(argv[0]), std::strtod(argv[1], nullptr), argv[2]);
+    Solve newSolve(std::atoi(argv[0]), std::strtod(argv[1], nullptr), argv[2],
+                   std::atoi(argv[3]));
     solvesDeq->push_front(newSolve);
 
     return 0;
@@ -131,7 +149,7 @@ bool dbConnection::addOldSolve(std::deque<Solve> &solvesDeque) {
         unsigned idToGet = solvesDeque.front().getId();
         unsigned lengthBefore = solvesDeque.size();
         std::string sql =
-            "SELECT rowid, time, scramble FROM solves WHERE rowid < " +
+            "SELECT rowid, time, scramble, penalty FROM solves WHERE rowid < " +
             std::to_string(idToGet) + " ORDER BY rowid DESC LIMIT 1;";
 
         char *errorMsg;
