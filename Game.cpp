@@ -1,6 +1,6 @@
 #include "Game.h"
 
-Game::Game(std::string dbFile) : connection(dbFile) {
+Game::Game(std::string dbFile) : connection(dbFile), solveWinIsOpen(false) {
     currentScramble = sBox.getCurrentScramble();
 
     // find maximum amount of solves that need to be queried from db and fill
@@ -13,6 +13,8 @@ Game::Game(std::string dbFile) : connection(dbFile) {
 
     // query db to have currentId be one more than maximum rowid
     currentId = connection.getLastRowid();
+    // set numSolves to be the total amount of solves in the db
+    numSolves = connection.getSolveNumber();
     // highlight most recent solve
     highlightedIndex = lastNSolves.size() - 1;
 
@@ -44,6 +46,11 @@ void Game::mainloop() {
             if (userChar == ' ') {
                 // only spacebar starts the timer
                 solving = true;
+                // hide solve window if it was left open
+                if (solveWinIsOpen) {
+                    solveWin.hideWindow();
+                    solveWinIsOpen = false;
+                }
                 tBox.startSolveTime();
             } else if (userChar == 'j' || userChar == KEY_DOWN) {
                 // highlight next solve down
@@ -51,6 +58,9 @@ void Game::mainloop() {
             } else if (userChar == 'k' || userChar == KEY_UP) {
                 // highlight previous solve up
                 scrollUp();
+            } else if (userChar == '\n') {
+                // show or hide window with additional solve information
+                toggleSolveWindow();
             } else if (userChar == ctrl('d')) {
                 // delete solve with ctrl + d
                 deleteSolveAtIndex(highlightedIndex);
@@ -75,6 +85,7 @@ void Game::mainloop() {
 void Game::endSolve() {
     currentId++;
     highlightedIndex++;
+    numSolves++;
 
     if (lastNSolves.size() == NUM_SHOWN_SOLVES) {
         bottomOfFrameIndex = lowestDisplayedIndex = 1;
@@ -100,12 +111,14 @@ void Game::endSolve() {
 void Game::scrollDown() {
     if (highlightedIndex > 0) {
         highlightedIndex--;
+        toShowNum--;
     } else {
         // if trying to scroll down past front of deque, try to get
         // an older solve from the db
         if (connection.addOldSolve(lastNSolves)) {
             bottomOfFrameIndex++;
             lowestDisplayedIndex++;
+            toShowNum--;
         }
     }
 
@@ -116,6 +129,12 @@ void Game::scrollDown() {
         if (lowestDisplayedIndex < 0) {
             lowestDisplayedIndex = 0;
         }
+    }
+
+    // redraw solve window if it was already open
+    if (solveWinIsOpen) {
+        solveWin.showWindow(lastNSolves.at(highlightedIndex), toShowNum,
+                            numSolves);
     }
 
     sBar.redrawSolves(lastNSolves, highlightedIndex,
@@ -134,12 +153,36 @@ void Game::scrollUp() {
 
         sBar.redrawSolves(lastNSolves, highlightedIndex,
                           bottomOfFrameIndex - lowestDisplayedIndex);
+
+        // redraw solve window if it was already open
+        if (solveWinIsOpen) {
+            toShowNum++;
+            solveWin.showWindow(lastNSolves.at(highlightedIndex), toShowNum,
+                                numSolves);
+        }
+    }
+}
+
+void Game::toggleSolveWindow() {
+    if (!lastNSolves.empty()) {
+        if (!solveWinIsOpen) {
+            Solve solveToShow = lastNSolves.at(highlightedIndex);
+            toShowNum = connection.getSolveNumber(solveToShow.getId());
+            solveWin.showWindow(solveToShow, toShowNum, numSolves);
+        } else {
+            solveWin.hideWindow();
+            tBox.updateSolveDisplay(currentSolve, shortAvg, longAvg,
+                                    SHORT_AVG_NUM, LONG_AVG_NUM);
+        }
+        refresh();
+        solveWinIsOpen = !solveWinIsOpen;
     }
 }
 
 void Game::deleteSolveAtIndex(int index) {
     // only try to delete solve if db is not empty
     if (!lastNSolves.empty()) {
+        numSolves--;
         // delete solve from db
         connection.deleteSolve(lastNSolves.at(index).getId());
         // decrement currentId and highlightedIndex if deleting the last solve
@@ -174,6 +217,12 @@ void Game::deleteSolveAtIndex(int index) {
             // next solve entered
             bottomOfFrameIndex = lowestDisplayedIndex = highlightedIndex = -1;
         }
+        // hide solve window if it was open
+        if (solveWinIsOpen) {
+            solveWin.hideWindow();
+            solveWinIsOpen = false;
+        }
+
         setAverages();
         tBox.updateSolveDisplay(currentSolve, shortAvg, longAvg, SHORT_AVG_NUM,
                                 LONG_AVG_NUM);
@@ -191,6 +240,11 @@ void Game::updatePenaltyAtIndex(int index, unsigned penalty) {
                           bottomOfFrameIndex - lowestDisplayedIndex);
         tBox.updateSolveDisplay(currentSolve, shortAvg, longAvg, SHORT_AVG_NUM,
                                 LONG_AVG_NUM);
+        // redraw solve window if it was already open
+        if (solveWinIsOpen) {
+            solveWin.showWindow(lastNSolves.at(highlightedIndex), toShowNum,
+                                numSolves);
+        }
     }
 }
 
@@ -220,6 +274,8 @@ void Game::setAverages() {
                 // handle +2
                 curTime += 2;
             } else if (curSolve.getPenalty() == 2) {
+                // make DNF be a huge time so that it's removed as the worst one
+                curTime = DNF_TIME_VALUE;
                 // count how many DNFs in each average (>=2 DNFs makes the
                 // entire average DNF)
                 if (i < SHORT_AVG_NUM) {

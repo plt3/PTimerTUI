@@ -34,7 +34,8 @@ public:
 
     static std::string timeToString(double timeToPrint,
                                     unsigned precision = DEFAULT_PRECISION);
-    std::string toString(unsigned precision = DEFAULT_PRECISION);
+    std::string toString(bool showDnfTime = false,
+                         unsigned precision = DEFAULT_PRECISION);
 };
 
 #endif // !TIMER_SOLVE_H

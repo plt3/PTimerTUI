@@ -27,6 +27,7 @@ public:
     void deleteSolve(unsigned id);
     void updateSolvePenalty(unsigned id, unsigned newPenalty);
     unsigned getLastRowid();
+    unsigned getSolveNumber(unsigned id = 0);
     void getLastNSolves(std::deque<Solve> &solvesDeque, unsigned numSolves);
     bool addOldSolve(std::deque<Solve> &solvesDeque);
 };

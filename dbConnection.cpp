@@ -13,7 +13,7 @@ dbConnection::~dbConnection() {
 }
 
 void dbConnection::createTable() {
-    // TODO: add date field to this? penalty?
+    // TODO: add date field to this?
     std::string sql = "CREATE TABLE IF NOT EXISTS solves("
                       "time REAL NOT NULL, "
                       "scramble TEXT NOT NULL, "
@@ -76,7 +76,7 @@ void dbConnection::updateSolvePenalty(unsigned id, unsigned newPenalty) {
 
 unsigned dbConnection::getLastRowid() {
     // return maximum rowid in solves table or 0 if table has no rows
-    std::string sql = "SELECT MAX(rowid) FROM solves";
+    std::string sql = "SELECT MAX(rowid) FROM solves;";
     unsigned lastRowid = 0;
     char *errorMsg;
 
@@ -90,6 +90,31 @@ unsigned dbConnection::getLastRowid() {
     }
 
     return lastRowid;
+}
+
+unsigned dbConnection::getSolveNumber(unsigned id) {
+    // return total number of solves if id = 0 (default) or which number solve
+    // with given id is if id is specified
+    std::string sql = "SELECT COUNT(*) FROM solves";
+    unsigned numSolves = 0;
+    char *errorMsg;
+
+    if (id != 0) {
+        sql += " WHERE rowid <= " + std::to_string(id);
+    }
+
+    sql += ";";
+
+    int response =
+        sqlite3_exec(dbPtr, sql.c_str(), rowidCallback, &numSolves, &errorMsg);
+
+    if (response != SQLITE_OK) {
+        std::string errCopy = errorMsg;
+        sqlite3_free(errorMsg);
+        throw std::invalid_argument(errCopy);
+    }
+
+    return numSolves;
 }
 
 int dbConnection::rowidCallback(void *intPtr, int argc, char **argv,

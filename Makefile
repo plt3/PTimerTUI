@@ -9,7 +9,7 @@
 CXX = g++
 CXXFLAGS = -std=c++11
 
-SOURCE_FILES = main.cpp Game.cpp Solve.cpp ScrambleBox.cpp TimerBox.cpp SolvesBar.cpp dbConnection.cpp
+SOURCE_FILES = main.cpp Game.cpp Solve.cpp ScrambleBox.cpp TimerBox.cpp SolvesBar.cpp SolveWindow.cpp dbConnection.cpp
 OBJECT_FILES = ${SOURCE_FILES:.cpp=.o}
 EXECUTABLE = PTimerTUI
 

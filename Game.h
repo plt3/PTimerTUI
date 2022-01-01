@@ -7,6 +7,7 @@
 
 #include "ScrambleBox.h"
 #include "Solve.h"
+#include "SolveWindow.h"
 #include "SolvesBar.h"
 #include "TimerBox.h"
 #include "dbConnection.h"
@@ -27,11 +28,15 @@ private:
     std::string currentScramble;
     std::deque<Solve> lastNSolves;
     unsigned currentId;
+    unsigned numSolves;
+    unsigned toShowNum;
     int highlightedIndex;
     int bottomOfFrameIndex;
     int lowestDisplayedIndex;
     double shortAvg;
     double longAvg;
+    SolveWindow solveWin;
+    bool solveWinIsOpen;
 
 public:
     Game(std::string dbFile = DEFAULT_FILENAME);
@@ -43,6 +48,7 @@ public:
     void endSolve();
     void scrollDown();
     void scrollUp();
+    void toggleSolveWindow();
 };
 
 #endif // !TIMER_GAME_H
