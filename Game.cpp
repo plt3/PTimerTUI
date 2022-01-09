@@ -51,6 +51,8 @@ void Game::mainloop() {
                     solveWin.hideWindow();
                     solveWinIsOpen = false;
                 }
+                tBox.updateSolveDisplay(currentSolve, shortAvg, longAvg,
+                                        SHORT_AVG_NUM, LONG_AVG_NUM);
                 tBox.startSolveTime();
             } else if (userChar == 'j' || userChar == KEY_DOWN) {
                 // highlight next solve down
@@ -97,6 +99,7 @@ void Game::endSolve() {
     currentSolve.setId(currentId);
     currentSolve.setTime(tBox.endSolveTime());
     currentSolve.setScramble(currentScramble);
+    currentSolve.setTimestamp();
     lastNSolves.push_back(currentSolve);
     setAverages();
     tBox.updateSolveDisplay(currentSolve, shortAvg, longAvg, SHORT_AVG_NUM,

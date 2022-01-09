@@ -21,8 +21,9 @@
 - once timer is running, can stop it with any keystroke
 - scroll through solves bar on left Vim-style with j/k or using arrow keys
   - solves are lazy loaded from database so performance should not really be affected by amount of solves done
-- delete highlighted solve in solves bar with ctrl + d
-- add/remove penalties for highlighted solve in solves bar:
+- toggle popup window containing information about selected solve in solves bar with Return key
+- delete selected solve with ctrl + d
+- add/remove penalties for selected solve:
   - remove penalty with ctrl + g (mnemonic: Good)
   - mark solve as +2 with ctrl + p (mnemonic: Plus 2)
   - mark solve as DNF with ctrl + n (mnemonic: did Not finish)
@@ -30,11 +31,14 @@
 ## TODO:
 
 - [x] add penalties
-- [ ] show information on solve in solves bar
+- [x] add timestamp to solves
+- [ ] handle times > 1 minute
+- [x] show information on solve in solves bar
 - [ ] give more statistics/number of solves above solves bar
 - [ ] allow for means instead of averages
 - [ ] config file
 - [ ] implement g/G?
 - [ ] add time tint?
+- [ ] display time with bigger numbers?
 - [ ] add sessions?
 - [ ] support other scramble types

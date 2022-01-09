@@ -20,8 +20,7 @@ std::string ScrambleBox::makeScramble() {
     unsigned counter = 0;
     bool first = true;
 
-    // scramble should be 20 moves long
-    while (counter < 20) {
+    while (counter < SCRAMBLE_LENGTH) {
         // choose random move
         chosenMove = ALL_MOVES[rand() % NUM_MOVES];
         // face of the chosen move

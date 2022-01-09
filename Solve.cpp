@@ -1,5 +1,15 @@
 #include "Solve.h"
 
+void Solve::setTimestamp(time_t toSet) {
+    if (toSet != 0) {
+        timestamp = toSet;
+    } else {
+        // set timestamp to current time if no argument provided
+        timestamp = std::chrono::system_clock::to_time_t(
+            std::chrono::system_clock::now());
+    }
+}
+
 std::string Solve::timeToString(double timeToPrint, unsigned precision) {
     // return string representation of time with specified precision
     std::ostringstream formatTime;
@@ -24,4 +34,10 @@ std::string Solve::toString(bool showDnfTime, unsigned precision) {
         // no penalty
         return timeToString(time, precision);
     }
+}
+
+std::string Solve::timestampToString() {
+    std::ostringstream formatTimestamp;
+    formatTimestamp << std::put_time(std::localtime(&timestamp), "%Y-%m-%d %X");
+    return formatTimestamp.str();
 }

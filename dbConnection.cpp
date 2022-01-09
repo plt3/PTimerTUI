@@ -13,11 +13,11 @@ dbConnection::~dbConnection() {
 }
 
 void dbConnection::createTable() {
-    // TODO: add date field to this?
     std::string sql = "CREATE TABLE IF NOT EXISTS solves("
                       "time REAL NOT NULL, "
                       "scramble TEXT NOT NULL, "
-                      "penalty INTEGER NOT NULL);";
+                      "penalty INTEGER NOT NULL, "
+                      "timestamp INTEGER NOT NULL);";
 
     char *errorMsg;
     int response = sqlite3_exec(dbPtr, sql.c_str(), nullptr, 0, &errorMsg);
@@ -33,7 +33,8 @@ void dbConnection::saveSolve(Solve toAdd) {
     std::string sql = "INSERT INTO solves VALUES(" +
                       std::to_string(toAdd.getTime()) + ", \"" +
                       toAdd.getScramble() + "\", " +
-                      std::to_string(toAdd.getPenalty()) + ");";
+                      std::to_string(toAdd.getPenalty()) + ", " +
+                      std::to_string(toAdd.getTimestamp()) + ");";
 
     char *errorMsg;
     int response = sqlite3_exec(dbPtr, sql.c_str(), nullptr, 0, &errorMsg);
@@ -133,9 +134,10 @@ int dbConnection::rowidCallback(void *intPtr, int argc, char **argv,
 
 void dbConnection::getLastNSolves(std::deque<Solve> &solvesDeque,
                                   unsigned numSolves) {
-    std::string sql = "SELECT rowid, time, scramble, penalty FROM solves ORDER "
-                      "BY rowid DESC LIMIT " +
-                      std::to_string(numSolves) + ";";
+    std::string sql =
+        "SELECT rowid, time, scramble, penalty, timestamp FROM solves ORDER "
+        "BY rowid DESC LIMIT " +
+        std::to_string(numSolves) + ";";
 
     char *errorMsg;
 
@@ -152,12 +154,15 @@ void dbConnection::getLastNSolves(std::deque<Solve> &solvesDeque,
 int dbConnection::pushSolveFrontCallback(void *deqPtr, int argc, char **argv,
                                          char **azColName) {
     std::deque<Solve> *solvesDeq = static_cast<std::deque<Solve> *>(deqPtr);
-    if (argc != 4) {
-        throw std::invalid_argument("Expected 4 returned columns from "
+    unsigned numColumns = 5;
+    if (argc != numColumns) {
+        throw std::invalid_argument("Expected " + std::to_string(numColumns) +
+                                    " returned columns from "
                                     "dbConnection::pushSolveFrontCallback");
     }
     Solve newSolve(std::atoi(argv[0]), std::strtod(argv[1], nullptr), argv[2],
-                   std::atoi(argv[3]));
+                   std::atoi(argv[3]),
+                   static_cast<time_t>(std::atoll(argv[4])));
     solvesDeq->push_front(newSolve);
 
     return 0;
@@ -167,15 +172,14 @@ bool dbConnection::addOldSolve(std::deque<Solve> &solvesDeque) {
     // only try to add solve if solvesDeq is not empty, because empty means that
     // there is nothing in the db to retrieve
     if (!solvesDeque.empty()) {
-        // TODO: check case if you only have one solve with id 2 in the database
-
         // this query gets the solve with greatest rowid that is less than the
         // id of the solve at the front of solvesDeque
         unsigned idToGet = solvesDeque.front().getId();
         unsigned lengthBefore = solvesDeque.size();
-        std::string sql =
-            "SELECT rowid, time, scramble, penalty FROM solves WHERE rowid < " +
-            std::to_string(idToGet) + " ORDER BY rowid DESC LIMIT 1;";
+        std::string sql = "SELECT rowid, time, scramble, penalty, timestamp "
+                          "FROM solves WHERE rowid < " +
+                          std::to_string(idToGet) +
+                          " ORDER BY rowid DESC LIMIT 1;";
 
         char *errorMsg;
 

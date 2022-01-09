@@ -17,6 +17,9 @@ const std::string ALL_MOVES[NUM_MOVES] = {
     "B", "B'", "B2", "R", "R'", "R2", "L", "L'", "L2",
 };
 
+// length that scrambles should be
+const unsigned SCRAMBLE_LENGTH = 20;
+
 class ScrambleBox {
 private:
     WINDOW *boxPtr;
