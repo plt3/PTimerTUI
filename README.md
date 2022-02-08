@@ -32,7 +32,7 @@
 
 - [x] add penalties
 - [x] add timestamp to solves
-- [ ] handle times > 1 minute
+- [x] handle times > 1 minute
 - [x] show information on solve in solves bar
 - [ ] give more statistics/number of solves above solves bar
 - [ ] allow for means instead of averages

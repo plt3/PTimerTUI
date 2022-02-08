@@ -12,8 +12,23 @@ void Solve::setTimestamp(time_t toSet) {
 
 std::string Solve::timeToString(double timeToPrint, unsigned precision) {
     // return string representation of time with specified precision
+    unsigned seconds = timeToPrint;
+    unsigned num60s = seconds / 60;
+    // essentially take a double mod 60 here
+    double secsToPrint = timeToPrint - 60 * num60s;
+    unsigned hours = seconds / 3600;
+    seconds %= 3600;
+    unsigned minutes = seconds / 60;
+
     std::ostringstream formatTime;
-    formatTime << std::fixed << std::setprecision(precision) << timeToPrint;
+    formatTime << std::setfill('0');
+    if (hours) {
+        formatTime << hours << ":" << std::setw(2);
+    }
+    if (hours || minutes) {
+        formatTime << minutes << ":" << std::setw(precision + 3);
+    }
+    formatTime << std::fixed << std::setprecision(precision) << secsToPrint;
 
     return formatTime.str();
 }

@@ -15,7 +15,7 @@ EXECUTABLE = PTimerTUI
 
 
 $(EXECUTABLE): $(OBJECT_FILES)
-	$(CXX) $(CXXFLAGS) -l ncurses -l sqlite3 $(OBJECT_FILES) -o PTimerTUI
+	$(CXX) $(CXXFLAGS) -l ncurses -l sqlite3 $(OBJECT_FILES) -o $(EXECUTABLE)
 
 $(OBJECT_FILES):
 	$(CXX) $(CXXFLAGS) -c $*.cpp
