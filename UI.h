@@ -1,5 +1,5 @@
-#ifndef TIMER_GAME_H
-#define TIMER_GAME_H
+#ifndef TIMER_UI_H
+#define TIMER_UI_H
 
 #include <algorithm>
 #include <deque>
@@ -18,7 +18,7 @@
 const unsigned SHORT_AVG_NUM = 5;
 const unsigned LONG_AVG_NUM = 15;
 
-class Game {
+class UI {
 private:
     dbConnection connection;
     ScrambleBox sBox;
@@ -39,8 +39,9 @@ private:
     bool solveWinIsOpen;
 
 public:
-    Game(std::string dbFile = DEFAULT_FILENAME);
-    ~Game() { endwin(); }
+    UI(std::string dbFile = DEFAULT_FILENAME,
+       std::string session = DEFAULT_SESSION_NAME);
+    ~UI() { endwin(); }
     void mainloop();
     void setAverages();
     void deleteSolveAtIndex(int index);
@@ -51,4 +52,4 @@ public:
     void toggleSolveWindow();
 };
 
-#endif // !TIMER_GAME_H
+#endif // !TIMER_UI_H

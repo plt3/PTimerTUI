@@ -1,6 +1,7 @@
-#include "Game.h"
+#include "UI.h"
 
-Game::Game(std::string dbFile) : connection(dbFile), solveWinIsOpen(false) {
+UI::UI(std::string dbFile, std::string session)
+    : connection(dbFile, session), solveWinIsOpen(false) {
     currentScramble = sBox.getCurrentScramble();
 
     // find maximum amount of solves that need to be queried from db and fill
@@ -36,7 +37,7 @@ Game::Game(std::string dbFile) : connection(dbFile), solveWinIsOpen(false) {
     refresh();
 }
 
-void Game::mainloop() {
+void UI::mainloop() {
     int userChar = getch();
     bool solving = false;
 
@@ -84,7 +85,7 @@ void Game::mainloop() {
     }
 }
 
-void Game::endSolve() {
+void UI::endSolve() {
     currentId++;
     highlightedIndex++;
     numSolves++;
@@ -111,7 +112,7 @@ void Game::endSolve() {
     currentScramble = sBox.getCurrentScramble();
 }
 
-void Game::scrollDown() {
+void UI::scrollDown() {
     if (highlightedIndex > 0) {
         highlightedIndex--;
         toShowNum--;
@@ -144,7 +145,7 @@ void Game::scrollDown() {
                       bottomOfFrameIndex - lowestDisplayedIndex);
 }
 
-void Game::scrollUp() {
+void UI::scrollUp() {
     if (highlightedIndex + 1 < lastNSolves.size()) {
         highlightedIndex++;
 
@@ -166,7 +167,7 @@ void Game::scrollUp() {
     }
 }
 
-void Game::toggleSolveWindow() {
+void UI::toggleSolveWindow() {
     if (!lastNSolves.empty()) {
         if (!solveWinIsOpen) {
             Solve solveToShow = lastNSolves.at(highlightedIndex);
@@ -182,7 +183,7 @@ void Game::toggleSolveWindow() {
     }
 }
 
-void Game::deleteSolveAtIndex(int index) {
+void UI::deleteSolveAtIndex(int index) {
     // only try to delete solve if db is not empty
     if (!lastNSolves.empty()) {
         numSolves--;
@@ -232,7 +233,7 @@ void Game::deleteSolveAtIndex(int index) {
     }
 }
 
-void Game::updatePenaltyAtIndex(int index, unsigned penalty) {
+void UI::updatePenaltyAtIndex(int index, unsigned penalty) {
     // only try to update penalty if db is not empty
     if (!lastNSolves.empty()) {
         Solve &toChange = lastNSolves.at(index);
@@ -251,7 +252,7 @@ void Game::updatePenaltyAtIndex(int index, unsigned penalty) {
     }
 }
 
-void Game::setAverages() {
+void UI::setAverages() {
     // set shortAvg and longAvg data members to the averages they represent, or
     // to zero if there are not enough times to calculate them
     if (lastNSolves.size() < SHORT_AVG_NUM) {

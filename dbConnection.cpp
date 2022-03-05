@@ -1,7 +1,8 @@
 #include "dbConnection.h"
 
-dbConnection::dbConnection(std::string filename) {
+dbConnection::dbConnection(std::string filename, std::string sessionName) {
     this->filename = filename;
+    this->sessionName = sessionName;
 
     sqlite3_open(filename.c_str(), &dbPtr);
     createTable();
@@ -13,7 +14,8 @@ dbConnection::~dbConnection() {
 }
 
 void dbConnection::createTable() {
-    std::string sql = "CREATE TABLE IF NOT EXISTS solves("
+    std::string sql = "CREATE TABLE IF NOT EXISTS " + sessionName +
+                      "("
                       "time REAL NOT NULL, "
                       "scramble TEXT NOT NULL, "
                       "penalty INTEGER NOT NULL, "
@@ -30,7 +32,7 @@ void dbConnection::createTable() {
 }
 
 void dbConnection::saveSolve(Solve toAdd) {
-    std::string sql = "INSERT INTO solves VALUES(" +
+    std::string sql = "INSERT INTO " + sessionName + " VALUES(" +
                       std::to_string(toAdd.getTime()) + ", \"" +
                       toAdd.getScramble() + "\", " +
                       std::to_string(toAdd.getPenalty()) + ", " +
@@ -47,8 +49,8 @@ void dbConnection::saveSolve(Solve toAdd) {
 }
 
 void dbConnection::deleteSolve(unsigned id) {
-    std::string sql =
-        "DELETE FROM solves WHERE rowid = " + std::to_string(id) + ";";
+    std::string sql = "DELETE FROM " + sessionName +
+                      " WHERE rowid = " + std::to_string(id) + ";";
     char *errorMsg;
 
     int response = sqlite3_exec(dbPtr, sql.c_str(), nullptr, 0, &errorMsg);
@@ -61,9 +63,9 @@ void dbConnection::deleteSolve(unsigned id) {
 }
 
 void dbConnection::updateSolvePenalty(unsigned id, unsigned newPenalty) {
-    std::string sql =
-        "UPDATE solves SET penalty = " + std::to_string(newPenalty) +
-        " WHERE rowid = " + std::to_string(id) + ";";
+    std::string sql = "UPDATE " + sessionName +
+                      " SET penalty = " + std::to_string(newPenalty) +
+                      " WHERE rowid = " + std::to_string(id) + ";";
     char *errorMsg;
 
     int response = sqlite3_exec(dbPtr, sql.c_str(), nullptr, 0, &errorMsg);
@@ -77,7 +79,7 @@ void dbConnection::updateSolvePenalty(unsigned id, unsigned newPenalty) {
 
 unsigned dbConnection::getLastRowid() {
     // return maximum rowid in solves table or 0 if table has no rows
-    std::string sql = "SELECT MAX(rowid) FROM solves;";
+    std::string sql = "SELECT MAX(rowid) FROM " + sessionName + ";";
     unsigned lastRowid = 0;
     char *errorMsg;
 
@@ -96,7 +98,7 @@ unsigned dbConnection::getLastRowid() {
 unsigned dbConnection::getSolveNumber(unsigned id) {
     // return total number of solves if id = 0 (default) or which number solve
     // with given id is if id is specified
-    std::string sql = "SELECT COUNT(*) FROM solves";
+    std::string sql = "SELECT COUNT(*) FROM " + sessionName + "";
     unsigned numSolves = 0;
     char *errorMsg;
 
@@ -134,10 +136,11 @@ int dbConnection::rowidCallback(void *intPtr, int argc, char **argv,
 
 void dbConnection::getLastNSolves(std::deque<Solve> &solvesDeque,
                                   unsigned numSolves) {
-    std::string sql =
-        "SELECT rowid, time, scramble, penalty, timestamp FROM solves ORDER "
-        "BY rowid DESC LIMIT " +
-        std::to_string(numSolves) + ";";
+    std::string sql = "SELECT rowid, time, scramble, penalty, timestamp FROM " +
+                      sessionName +
+                      " ORDER "
+                      "BY rowid DESC LIMIT " +
+                      std::to_string(numSolves) + ";";
 
     char *errorMsg;
 
@@ -177,7 +180,8 @@ bool dbConnection::addOldSolve(std::deque<Solve> &solvesDeque) {
         unsigned idToGet = solvesDeque.front().getId();
         unsigned lengthBefore = solvesDeque.size();
         std::string sql = "SELECT rowid, time, scramble, penalty, timestamp "
-                          "FROM solves WHERE rowid < " +
+                          "FROM " +
+                          sessionName + " WHERE rowid < " +
                           std::to_string(idToGet) +
                           " ORDER BY rowid DESC LIMIT 1;";
 

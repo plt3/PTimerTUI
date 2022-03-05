@@ -15,8 +15,15 @@ int main(int argc, char *argv[]) {
     refresh();
     // END stuff that needs to run before the Game constructor
 
-    Game test;
-    test.mainloop();
+    std::string sessionArg = "--session";
+    if (argc == 3 && argv[1] == sessionArg) {
+        // this is very vulnerable to SQL injection
+        UI timer(DEFAULT_FILENAME, argv[2]);
+        timer.mainloop();
+    } else {
+        UI timer;
+        timer.mainloop();
+    }
 
     return 0;
 }

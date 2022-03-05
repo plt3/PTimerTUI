@@ -7,10 +7,12 @@
 #include <string>
 
 const std::string DEFAULT_FILENAME = "solves.db";
+const std::string DEFAULT_SESSION_NAME = "default_session";
 
 class dbConnection {
 private:
     std::string filename;
+    std::string sessionName;
     sqlite3 *dbPtr;
     void createTable();
     static int rowidCallback(void *intPtr, int argc, char **argv,
@@ -21,7 +23,8 @@ private:
                                    char **azColName);
 
 public:
-    dbConnection(std::string filename = DEFAULT_FILENAME);
+    dbConnection(std::string filename = DEFAULT_FILENAME,
+                 std::string sessionName = DEFAULT_SESSION_NAME);
     ~dbConnection();
     void saveSolve(Solve toAdd);
     void deleteSolve(unsigned id);

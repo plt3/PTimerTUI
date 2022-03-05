@@ -34,6 +34,8 @@
 - [x] add timestamp to solves
 - [x] handle times > 1 minute
 - [x] show information on solve in solves bar
+- [ ] add some sort of marker in UI of what session is active
+- [ ] add keybind to switch sessions
 - [ ] give more statistics/number of solves above solves bar
 - [ ] allow for means instead of averages
 - [ ] config file
