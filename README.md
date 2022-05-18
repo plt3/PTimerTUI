@@ -24,6 +24,7 @@
 - scroll through solves bar on left Vim-style with j/k or using arrow keys
   - solves are lazy loaded from database so performance should not really be affected by amount of solves done
 - toggle popup window containing information about selected solve in solves bar with Return key
+- quit timer with q or ctrl + c
 - use `--help` command line argument to output usage information
 
 ### Penalties/Deleting Times:
