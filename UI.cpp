@@ -34,6 +34,10 @@ UI::UI(std::string dbFile, std::string session)
     tBox.updateSolveDisplay(currentSolve, shortAvg, longAvg, SHORT_AVG_NUM,
                             LONG_AVG_NUM);
 
+    // print session name above solves bar
+    std::string sessionStr = "[" + session + "]";
+    mvprintw(3, 0, sessionStr.c_str());
+
     refresh();
 }
 
@@ -75,6 +79,10 @@ void UI::mainloop() {
                 updatePenaltyAtIndex(highlightedIndex, 1);
             } else if (userChar == ctrl('n')) {
                 updatePenaltyAtIndex(highlightedIndex, 2);
+            } else if (userChar == ctrl('f')) {
+                changeSession();
+            } else if (userChar == ctrl('b')) {
+                changeSession(false);
             }
         } else {
             // use any key to stop the timer
@@ -338,4 +346,33 @@ void UI::setAverages() {
             }
         }
     }
+}
+
+void UI::changeSession(bool forward) {
+    if (solveWinIsOpen) {
+        solveWin.hideWindow();
+        solveWinIsOpen = false;
+    }
+    connection.changeSession(forward);
+    lastNSolves.clear();
+    connection.getLastNSolves(lastNSolves, LONG_AVG_NUM);
+    setAverages();
+    currentId = connection.getLastRowid();
+    numSolves = connection.getSolveNumber();
+    highlightedIndex = lastNSolves.size() - 1;
+
+    lowestDisplayedIndex = bottomOfFrameIndex =
+        lastNSolves.size() - NUM_SHOWN_SOLVES;
+    if (bottomOfFrameIndex < 0) {
+        lowestDisplayedIndex = bottomOfFrameIndex = 0;
+    }
+
+    sBar.redrawSolves(lastNSolves, highlightedIndex,
+                      bottomOfFrameIndex - lowestDisplayedIndex);
+    tBox.updateSolveDisplay(currentSolve, shortAvg, longAvg, SHORT_AVG_NUM,
+                            LONG_AVG_NUM);
+    std::string sessionStr = "[" + connection.getCurrentSession() + "]";
+    move(3, 0);
+    clrtoeol();
+    printw(sessionStr.c_str());
 }

@@ -50,6 +50,7 @@ public:
     void scrollDown();
     void scrollUp();
     void toggleSolveWindow();
+    void changeSession(bool forward = true);
 };
 
 #endif // !TIMER_UI_H

@@ -15,17 +15,22 @@ private:
     std::string sessionName;
     sqlite3 *dbPtr;
     void createTable();
+    static int sessionListCallback(void *deqPtr, int argc, char **argv,
+                                   char **azColName);
     static int rowidCallback(void *intPtr, int argc, char **argv,
                              char **azColName);
     static int pushSolveFrontCallback(void *deqPtr, int argc, char **argv,
                                       char **azColName);
     static int addOldSolveCallback(void *deqPtr, int argc, char **argv,
                                    char **azColName);
+    void getAllSessions(std::deque<std::string> &sessionDeque);
 
 public:
     dbConnection(std::string filename = DEFAULT_FILENAME,
                  std::string sessionName = DEFAULT_SESSION_NAME);
     ~dbConnection();
+    std::string getCurrentSession() { return sessionName; }
+    void changeSession(bool forward = true);
     void saveSolve(Solve toAdd);
     void deleteSolve(unsigned id);
     void updateSolvePenalty(unsigned id, unsigned newPenalty);

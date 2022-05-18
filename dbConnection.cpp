@@ -31,6 +31,56 @@ void dbConnection::createTable() {
     }
 }
 
+void dbConnection::changeSession(bool forward) {
+    std::deque<std::string> sessions;
+    getAllSessions(sessions);
+    unsigned sessionInd = 0;
+    unsigned len = sessions.size();
+
+    for (unsigned i = 0; i < len; i++) {
+        if (sessions.at(i) == sessionName) {
+            sessionInd = i;
+        }
+    }
+
+    if (forward) {
+        sessionName = sessions.at((sessionInd + 1) % len);
+    } else {
+        sessionName = sessions.at((sessionInd + len - 1) % len);
+    }
+}
+
+void dbConnection::getAllSessions(std::deque<std::string> &sessionDeque) {
+    std::string sql = "SELECT name FROM sqlite_schema WHERE type = 'table' AND "
+                      "name NOT LIKE 'sqlite_%;'";
+
+    char *errorMsg;
+
+    int response = sqlite3_exec(dbPtr, sql.c_str(), sessionListCallback,
+                                &sessionDeque, &errorMsg);
+
+    if (response != SQLITE_OK) {
+        std::string errCopy = errorMsg;
+        sqlite3_free(errorMsg);
+        throw std::invalid_argument(errCopy);
+    }
+}
+
+int dbConnection::sessionListCallback(void *deqPtr, int argc, char **argv,
+                                      char **azColName) {
+    std::deque<std::string> *sessionDeq =
+        static_cast<std::deque<std::string> *>(deqPtr);
+    unsigned numColumns = 1;
+    if (argc != numColumns) {
+        throw std::invalid_argument("Expected " + std::to_string(numColumns) +
+                                    " returned columns from "
+                                    "dbConnection::sessionListCallback");
+    }
+    sessionDeq->push_front(argv[0]);
+
+    return 0;
+}
+
 void dbConnection::saveSolve(Solve toAdd) {
     std::string sql = "INSERT INTO " + sessionName + " VALUES(" +
                       std::to_string(toAdd.getTime()) + ", \"" +

@@ -3,7 +3,7 @@
 SolvesBar::SolvesBar() {
     height = NUM_SHOWN_SOLVES + 2;
     width = MIN_WIDTH;
-    barPtr = newwin(height, width, 3, 0);
+    barPtr = newwin(height, width, 4, 0);
 }
 
 SolvesBar::~SolvesBar() {
