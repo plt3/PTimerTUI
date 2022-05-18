@@ -24,6 +24,7 @@
 - scroll through solves bar on left Vim-style with j/k or using arrow keys
   - solves are lazy loaded from database so performance should not really be affected by amount of solves done
 - toggle popup window containing information about selected solve in solves bar with Return key
+- use `--help` command line argument to output usage information
 
 ### Penalties/Deleting Times:
 
@@ -36,6 +37,8 @@
 ### Sessions:
 
 - create a new session or use an existing one by adding the `--session mysessionname` command line argument
+- delete a session with the `--delete-session mysessionname` command line argument
+- list all sessions with the `--list-sessions` command line argument
 - cycle forward through sessions with ctrl + f (mnemonic: Forward)
 - cycle backwards through sessions with ctrl + b (mnemonic: Backward)
 - session name is indicated above solves bar

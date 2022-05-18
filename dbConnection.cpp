@@ -50,6 +50,25 @@ void dbConnection::changeSession(bool forward) {
     }
 }
 
+void dbConnection::deleteSession(std::string name) {
+    std::string sql = "DROP TABLE " + name + ";";
+    char *errorMsg;
+    int response = sqlite3_exec(dbPtr, sql.c_str(), nullptr, 0, &errorMsg);
+
+    if (response != SQLITE_OK) {
+        std::string errCopy = errorMsg;
+        sqlite3_free(errorMsg);
+        throw std::invalid_argument(errCopy);
+    }
+
+    std::deque<std::string> sessions;
+    getAllSessions(sessions);
+    if (sessions.empty()) {
+        sessionName = DEFAULT_SESSION_NAME;
+        createTable();
+    }
+}
+
 void dbConnection::getAllSessions(std::deque<std::string> &sessionDeque) {
     std::string sql = "SELECT name FROM sqlite_schema WHERE type = 'table' AND "
                       "name NOT LIKE 'sqlite_%;'";

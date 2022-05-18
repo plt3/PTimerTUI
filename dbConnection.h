@@ -23,14 +23,15 @@ private:
                                       char **azColName);
     static int addOldSolveCallback(void *deqPtr, int argc, char **argv,
                                    char **azColName);
-    void getAllSessions(std::deque<std::string> &sessionDeque);
 
 public:
     dbConnection(std::string filename = DEFAULT_FILENAME,
                  std::string sessionName = DEFAULT_SESSION_NAME);
     ~dbConnection();
     std::string getCurrentSession() { return sessionName; }
+    void getAllSessions(std::deque<std::string> &sessionDeque);
     void changeSession(bool forward = true);
+    void deleteSession(std::string name);
     void saveSolve(Solve toAdd);
     void deleteSolve(unsigned id);
     void updateSolvePenalty(unsigned id, unsigned newPenalty);
